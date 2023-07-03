@@ -1,0 +1,82 @@
+{
+  "home_path": "/home/lamlam/data",
+
+  "experiment_name": "train_model_inthedark",
+  "dataset_name": "inthedark",
+  "checkpoint_name": "network_inthedark",
+
+  "training": {
+    "start_pose_estimation": 4,
+    "max_epochs": 500,
+    "patience": 50
+  },
+
+  "network": {
+    "num_channels": 3,
+    "num_classes": 1,
+    "layer_size": 16
+  },
+
+  "pipeline": {
+    "window_h": 16,
+    "window_w": 16,
+    "dense_matching": true
+  },
+
+  "outlier_rejection": {
+    "on": true,
+    "type": "ground_truth",
+    "dim": ["plane"],
+    "inlier_threshold": 0.6,
+    "error_tolerance":  {"3D": 4.0, "2D": 50.0, "plane": 3.0},
+    "num_iterations": 15
+  },
+
+  "data_loader": {
+    "batch_size": 3,
+    "num_workers": 3,
+    "shuffle": false
+  },
+
+  "stereo": {
+    "cu": 253.502,
+    "cv": 196.822,
+    "f": 388.425,
+    "b": 0.239946
+  },
+
+  "dataset": {
+    "height": 384,
+    "width": 512,
+    "use_normalization": false,
+    "use_disparity": true
+  },
+
+  "optimizer": {
+    "type": "Adam",
+    "lr": 0.0001
+  },
+
+  "scheduler": {
+    "type": "StepLR",
+    "step_size": 50,
+    "gamma": 1.0
+  },
+
+  "loss": {
+    "types": [
+      "pose_plane",
+      "keypoint_plane"
+    ],
+    "weights": {
+      "translation": 1.0,
+      "rotation": 10.0,
+      "translation_x": 1.0,
+      "translation_y": 50.0,
+      "rotation_heading": 10.0,
+      "keypoint_2D": 0.01,
+      "keypoint_3D": 1.0,
+      "keypoint_plane": 2.5
+    }
+  }
+}

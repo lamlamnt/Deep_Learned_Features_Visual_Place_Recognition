@@ -1,0 +1,54 @@
+{
+  "home_path": "/home/lamlam/data",
+
+  "experiment_name": "test_model_inthedark_own",
+  "dataset_name": "inthedark",
+  "checkpoint_name": "network_inthedark_layer32",
+
+  "network": {
+    "num_channels": 3,
+    "num_classes": 1,
+    "layer_size": 32
+  },
+
+  "pipeline": {
+    "window_h": 16,
+    "window_w": 16,
+    "dense_matching": true
+  },
+
+  "outlier_rejection": {
+    "on": true,
+    "type": "ransac",
+    "dim": ["3D"],
+    "inlier_threshold": 0.6,
+    "error_tolerance":  {"3D": 4.0, "2D": 50.0},
+    "num_iterations": 15
+  },
+
+  "data_loader": {
+    "batch_size": 1,
+    "num_workers": 1,
+    "shuffle": false
+  },
+
+  "stereo": {
+    "cu": 253.502,
+    "cv": 196.822,
+    "f": 388.425,
+    "b": 0.239946
+  },
+
+  "dataset": {
+    "height": 384,
+    "width": 512,
+    "use_normalization": false,
+    "use_disparity": true
+  },
+
+  "loss": {
+    "types": [
+      "pose_plane"
+    ]
+  }
+}

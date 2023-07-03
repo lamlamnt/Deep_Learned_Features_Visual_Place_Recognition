@@ -64,17 +64,37 @@ void Engine::runInference(cuda::GpuMat input, vector<vector<vector<float>>> feat
 {
     cudaStream_t inferenceCudaStream;
 
-    nvinfer1::Dims4 inputDims = {1, m_inputDims[0].d[0], m_inputDims[0].d[1], m_inputDims[0].d[2]};
-    m_context->setBindingDimensions(1,inputDims);
+    //nvinfer1::Dims4 inputDims = {1, m_inputDims[0].d[0], m_inputDims[0].d[1], m_inputDims[0].d[2]};
+    //m_context->setBindingDimensions(1,inputDims);
     auto *dataPointer = input.ptr<void>();
+    //Copy from CPU to GPU
     cudaMemcpyAsync(m_buffers[0], dataPointer,m_inputDims[0].d[1] * m_inputDims[0].d[2] * m_inputDims[0].d[0] * sizeof(float),cudaMemcpyDeviceToDevice, inferenceCudaStream);
+    
+    //The actual inference bit
     m_context->enqueueV2(m_buffers.data(), inferenceCudaStream, nullptr);
     
-    // Copy the outputs back to CPU
+    // Copy the outputs from GPU to CPU
     featureVectors.clear();
-
+    vector<vector<float>> batchOutputs{};
+    for (int32_t outputBinding = 1; outputBinding < m_engine->getNbBindings(); ++outputBinding) 
+    {
+        vector<float> output;
+        auto outputLenFloat = m_outputDims[outputBinding-1].d[0]*m_outputDims[outputBinding-1].d[1]*m_outputDims[outputBinding-1].d[2];
+        output.resize(outputLenFloat);
+        // Copy the output
+        cudaMemcpyAsync(output.data(), static_cast<char*>(m_buffers[outputBinding]) + (sizeof(float) * outputLenFloat), outputLenFloat * sizeof(float), cudaMemcpyDeviceToHost, inferenceCudaStream);
+        batchOutputs.emplace_back(move(output));
+    }
+    featureVectors.emplace_back(move(batchOutputs));
+    
     cudaStreamSynchronize(inferenceCudaStream);
     cudaStreamDestroy(inferenceCudaStream);
+    
+    // Free the GPU memory
+    for (auto & buffer : m_buffers) {
+        cudaFree(buffer);
+    }
+    m_buffers.clear();
 }
 
 

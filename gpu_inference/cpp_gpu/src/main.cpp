@@ -14,8 +14,7 @@ int main()
     string trtpath = "/home/lamlam/data/cpp_data/multiseason_layer16.trt";
 
     //Could do proper getDeviceCount stuff later
-    int deviceIndex = 0;
-    cudaSetDevice(deviceIndex);
+    cudaSetDevice(0);
     Engine engine;
     engine.loadNetwork(trtpath);
 
@@ -56,7 +55,23 @@ int main()
     //The input fed into this function is already the right size and the scaled to 0-1
     // The default Engine::runInference method will normalize values between [0.f, 1.f]   
     engine.runInference(scaled, featureVectors);
+    
+    /*
+    size_t numIterations = 3;
 
+    // Benchmark the inference time
+    auto t1 = Clock::now();
+    for (size_t i = 0; i < numIterations; ++i) {
+        featureVectors.clear();
+        engine.runInference(scaled, featureVectors);
+    }
+    auto t2 = Clock::now();
+    double totalTime = chrono::duration_cast<chrono::milliseconds>(t2 - t1).count();
+
+    cout << "Average time per inference in ms: " << totalTime / numIterations<<endl;
+
+    //Get outputs 
+    */
     return 0;
 }
 

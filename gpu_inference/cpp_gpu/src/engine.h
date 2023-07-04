@@ -17,9 +17,11 @@ class Logger : public nvinfer1::ILogger
 class Engine 
 {
     public:
+        ~Engine();
         void loadNetwork(string trtFilePath);
-        void runInference(cuda::GpuMat input, vector<vector<vector<float>>> featureVectors);
-        const std::vector<nvinfer1::Dims3>& getInputDims() const { return m_inputDims; };
+        void runInference(cuda::GpuMat input, vector<vector<float>>& outputEmpty, vector<vector<float>>& output);
+        const vector<nvinfer1::Dims3>& getInputDims() const { return m_inputDims; };
+        const std::vector<nvinfer1::Dims>& getOutputDims() const { return m_outputDims ;};
     private:
         unique_ptr<nvinfer1::IRuntime> m_runtime = nullptr;
         unique_ptr<nvinfer1::ICudaEngine> m_engine = nullptr;
@@ -28,8 +30,8 @@ class Engine
 
          // Holds pointers to the input and output GPU buffers
         vector<void*> m_buffers;
-        std::vector<nvinfer1::Dims3> m_inputDims;
+        vector<nvinfer1::Dims3> m_inputDims;
         vector<nvinfer1::Dims> m_outputDims;
-
+        inline void checkCudaErrorCode(cudaError_t code);
 };
 

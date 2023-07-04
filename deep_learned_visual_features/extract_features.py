@@ -106,9 +106,13 @@ class LearnedFeatureDetector(nn.Module):
             image_tensor = image_tensor.cuda()
 
         detector_scores, scores, descriptors = self.net(image_tensor)
+        print(image_tensor)
         print("Shape of output1:", detector_scores.size())
         print("Shape of ouput 2", scores.size())
         print("Shape of output 3", descriptors.size())
+        print(detector_scores)
+        print(scores)
+        print(descriptors)
 
         scores = self.sigmoid(scores)
 

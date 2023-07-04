@@ -131,10 +131,10 @@ int main() {
   Tensor scores = out.toTuple()->elements()[1].toTensor();
   // CPUFloatType{1,496,384,512}
   Tensor descriptors = out.toTuple()->elements()[2].toTensor();
-  
+
   //Get 2D keypoint coordinates from detector scores, Bx2xN using keypoint block
-  KeypointBlock block = KeypointBlock(16,16,384,512);
-  Tensor keypoints = block.forward(detector_scores);
+  //KeypointBlock block = KeypointBlock(16,16,384,512);
+  //Tensor keypoints = block.forward(detector_scores);
 
   return 0;
 }

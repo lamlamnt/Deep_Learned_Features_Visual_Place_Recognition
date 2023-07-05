@@ -1,16 +1,12 @@
 #!/usr/bin/env python3
 import glob
-
 import cv2
 import numpy as np
-
 import dbow
-
-
 np.random.seed(123)
 
 print("Loading Images")
-images_path = glob.glob("./images/*.png")
+images_path = glob.glob("/Volumes/oridatastore09/ThirdPartyData/utias/inthedark/run_000000/images/left/*.png")
 images = []
 for image_path in images_path:
     images.append(cv2.imread(image_path))
@@ -50,16 +46,16 @@ for image in images:
     match_desc = db.descriptors[np.argmax(scores)]
 
 print("Saving and Loading Vocabulary")
-vocabulary.save("/home/lamlam/data/bow/vocabulary.pickle")
-loaded_vocabulary = vocabulary.load("/home/lamlam/data/bow/vocabulary.pickle")
+vocabulary.save("/home/lamlam/data/bow/vocabulary_inthedark_0.pickle")
+loaded_vocabulary = vocabulary.load("/home/lamlam/data/bow/vocabulary_inthedark_0.pickle")
 for image in images:
     kps, descs = orb.detectAndCompute(image, None)
     descs = [dbow.ORB.from_cv_descriptor(desc) for desc in descs]
     loaded_vocabulary.descs_to_bow(descs)
 
 print("Saving and Loading Database")
-db.save("/home/lamlam/data/bow/database.pickle")
-loaded_db = db.load("/home/lamlam/data/bow/database.pickle")
+db.save("/home/lamlam/data/bow/database_inthedark_0.pickle")
+loaded_db = db.load("/home/lamlam/data/bow/database_inthedark_0.pickle")
 for image in images:
     kps, descs = orb.detectAndCompute(image, None)
     descs = [dbow.ORB.from_cv_descriptor(desc) for desc in descs]

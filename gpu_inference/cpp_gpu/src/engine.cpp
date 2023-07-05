@@ -65,7 +65,7 @@ void Engine::loadNetwork(string trtFilePath)
 }
 
 
-void Engine::runInference(cuda::GpuMat input, vector<vector<float>>& outputEmpty, vector<vector<float>>& output)
+void Engine::runInference(cuda::GpuMat input, vector<vector<float>>& output)
 {
     cudaStream_t inferenceCudaStream;
     cudaStreamCreate(&inferenceCudaStream);
@@ -79,35 +79,17 @@ void Engine::runInference(cuda::GpuMat input, vector<vector<float>>& outputEmpty
     m_context->enqueueV2(m_buffers.data(), inferenceCudaStream, nullptr);
 
     //Copy from GPU to CPU
-    vector<vector<float>> batchOutputs{};
     for (int32_t outputBinding = 1; outputBinding < m_engine->getNbBindings(); ++outputBinding) 
     {
         int outputLenFloat = m_outputDims[outputBinding-1].d[0]*m_outputDims[outputBinding-1].d[1]*m_outputDims[outputBinding-1].d[2]*m_outputDims[outputBinding-1].d[3];
-        //outputEmpty[outputBinding-1].resize(outputLenFloat);
-        cudaMemcpyAsync(outputEmpty[outputBinding-1].data(), static_cast<char*>(m_buffers[outputBinding]), outputLenFloat * sizeof(float), cudaMemcpyDeviceToHost, inferenceCudaStream);
-        output.push_back(outputEmpty[outputBinding-1]);
+        //This line here is most time consuming - producing/allocating memory for a very large vector
+        vector<float> one_output(outputLenFloat);
+        cudaMemcpyAsync(one_output.data(), static_cast<char*>(m_buffers[outputBinding]), outputLenFloat * sizeof(float), cudaMemcpyDeviceToHost, inferenceCudaStream);
+        output.emplace_back(move(one_output));
     }
-    /*
-    for (int32_t outputBinding = 1; outputBinding < m_engine->getNbBindings(); ++outputBinding) 
-    {
-        int outputLenFloat = m_outputDims[outputBinding-1].d[0]*m_outputDims[outputBinding-1].d[1]*m_outputDims[outputBinding-1].d[2]*m_outputDims[outputBinding-1].d[3];
-        auto t1_d = Clock::now();
-        vector<float> output(outputLenFloat);
-        //output.resize(outputLenFloat);
-        auto t2_d = Clock::now();
-        double totalTime_move4 = chrono::duration_cast<chrono::milliseconds>(t2_d - t1_d).count();
-        //cout << "Time to do resizing: " << totalTime_move4 <<endl;
-        //Uses pointer arithmetic
-        cudaMemcpyAsync(output.data(), static_cast<char*>(m_buffers[outputBinding]), outputLenFloat * sizeof(float), cudaMemcpyDeviceToHost, inferenceCudaStream);
-        batchOutputs.emplace_back(std::move(output));
-    }
-    */
     
     cudaStreamSynchronize(inferenceCudaStream);
     cudaStreamDestroy(inferenceCudaStream);
-
-    //Should this be included
-    //outputEmpty.clear();
 }
 
 void Engine::checkCudaErrorCode(cudaError_t code) {

@@ -23,6 +23,9 @@ def build_engine(onnx_model_path, tensorrt_engine_path, engine_precision, img_si
     # Set FP16 
     if engine_precision == 'FP16':
         config.set_flag(trt.BuilderFlag.FP16)
+
+    if engine_precision == 'INT8':
+        config.set_flag(trt.BuilderFlag.INT8)
     
     # Onnx parser
     parser = trt.OnnxParser(network, logger)
@@ -62,8 +65,12 @@ example = torch.rand(1, 3, 384, 512)
 onnx_path = "/home/lamlam/data/cpp_data/multiseason_layer_16.onnx"  # Specify the path and filename for the ONNX model
 torch.onnx.export(model, example, onnx_path)
 
+#Compare ONNX and Pytorch results
+
 #Load ONNX model
 onnx_model = onnx.load(onnx_path)
 tensorrt_engine_path = "/home/lamlam/data/cpp_data/multiseason_layer16.trt"
 build_engine(onnx_path, tensorrt_engine_path, 'FP16', (1,3,384,512))
+
+
 

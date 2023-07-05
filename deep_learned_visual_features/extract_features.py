@@ -13,6 +13,7 @@ import cv2
 from src.model.unet import UNet
 from src.model.keypoint_block import KeypointBlock
 from src.utils.keypoint_tools import normalize_coords, get_norm_descriptors, get_scores
+from src.dataset import Dataset
 
 
 def get_keypoint_info(kpt_2D, scores_map, descriptors_map):
@@ -106,13 +107,10 @@ class LearnedFeatureDetector(nn.Module):
             image_tensor = image_tensor.cuda()
 
         detector_scores, scores, descriptors = self.net(image_tensor)
-        print(image_tensor)
-        print("Shape of output1:", detector_scores.size())
-        print("Shape of ouput 2", scores.size())
-        print("Shape of output 3", descriptors.size())
         print(detector_scores)
         print(scores)
         print(descriptors)
+        
 
         scores = self.sigmoid(scores)
 
@@ -141,7 +139,7 @@ if __name__ == '__main__':
     
     #test_image_random = torch.rand(1, 3, 384, 512)
 
-    image_path = "/Volumes/oridatastore09/ThirdPartyData/utias/multiseason/run_000001/images/left/000057.png"
+    image_path = "/Volumes/oridatastore09/ThirdPartyData/utias/multiseason/run_000010/images/left/000200.png"
 
     # Read the image
     image = cv2.imread(image_path)
@@ -158,7 +156,7 @@ if __name__ == '__main__':
     
     keypoints, descriptors, scores = learned_feature_detector.run(test_image)
     
-    print(keypoints.size()) 
-    print(descriptors.size()) 
-    print(scores.size()) 
+    #print(keypoints.size()) 
+    #print(descriptors.size()) 
+    #print(scores.size()) 
     

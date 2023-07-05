@@ -8,6 +8,9 @@ from unet import UNet
 import tensorrt as trt
 import numpy as np
 import onnx
+import onnxruntime as onnxrt
+import cv2
+from torchvision import transforms
 
 torch.cuda.is_available_lazy = True
 
@@ -54,6 +57,7 @@ def build_engine(onnx_model_path, tensorrt_engine_path, engine_precision, img_si
     with open(tensorrt_engine_path, "wb") as f:
         f.write(engineString)
 
+
 #Load trained network from .pth file
 model = UNet(3,1,16)
 file_path = "/home/lamlam/data/networks/network_multiseason_layer16.pth"
@@ -62,10 +66,23 @@ model.eval()
 example = torch.rand(1, 3, 384, 512)
 
 #Convert to ONNX model 
-onnx_path = "/home/lamlam/data/cpp_data/multiseason_layer_16.onnx"  # Specify the path and filename for the ONNX model
-torch.onnx.export(model, example, onnx_path)
+onnx_path = "/home/lamlam/data/cpp_data/multiseason_layer_16_testing.onnx"  # Specify the path and filename for the ONNX model
+torch.onnx.export(model, example, onnx_path, do_constant_folding=True, input_names = ["img"])
+onnx.checker.check_model(onnx_path, True)
 
-#Compare ONNX and Pytorch results
+#Used to compare ONNX results with PyTorch outputs
+image_path = "/Volumes/oridatastore09/ThirdPartyData/utias/multiseason/run_000010/images/left/000200.png"
+image = cv2.imread(image_path)  
+image = cv2.cvtColor(image, cv2.COLOR_BGR2RGB)
+transform = transforms.Compose([transforms.ToTensor()])
+tensor = transform(image)
+test_image = tensor[None,:,:,:].contiguous()
+
+#example2 = np.random.randn(1, 3, 384, 512).astype(np.float32)
+onnx_session= onnxrt.InferenceSession(onnx_path)
+onnx_inputs= {onnx_session.get_inputs()[0].name:test_image.numpy()}
+onnx_output = onnx_session.run(None, onnx_inputs)
+print(onnx_output)
 
 #Load ONNX model
 onnx_model = onnx.load(onnx_path)

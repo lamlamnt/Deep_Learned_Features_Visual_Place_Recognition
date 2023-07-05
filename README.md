@@ -26,11 +26,13 @@
 <br> 
 <br> gpu_inference/exportnetwork.py exports the .pth file into an ONNX model and then from ONNX model to TensorRT engine (there are probably other better ways to do this conversion, like a direct conversion for example instead of through 3 different frameworks)
 <br>
-<br> gpu_inference/cpp_gpu/src contains the code to do inference (just the Unet part, not including the subsequent operations like matching or outlier rejection) -> NOT FINISHED. For batch size 1. 
+<br> gpu_inference/cpp_gpu/src contains the code to do inference (just the Unet part, not including the subsequent operations like matching or outlier rejection) -> For batch size 1. 
 <br> Currently, Input: {1,3,384,512}. 
 <br> Outputs: Keypoints: torch.Size([1, 2, 768]), Descriptors: torch.Size([1, 496, 768]), Scores: torch.Size([1, 1, 768])
 <br> Based on: https://github.com/cyrusbehr/tensorrt-cpp-api and https://learnopencv.com/how-to-run-inference-using-tensorrt-c-api/
 <br> Note the need to convert from NHWC (opencv) to NCHW (tensorRT).
+<br>
+<br> Accuracy issues probably in the Pytorch -> ONNX -> TensorRT engien 
 <br>
 <br> 3. Inference using Torch JIT and subsequent tensor operations for the other blocks in the pipeline using LibTorch on CPU (there's also a GPU version of this library): 
 <br> cpp_binding/exportnetwork_to_pt.py exports .pth to .pt file and cpp_binding/test.cpp uses Torch Jit to load the .pt file and performs inference

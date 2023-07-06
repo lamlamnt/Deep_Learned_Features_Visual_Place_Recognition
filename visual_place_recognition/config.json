@@ -1,0 +1,6 @@
+{
+    "reference_run":2,
+    "query_run":11,
+    "network_path": "/home/lamlam/data/networks/network_inthedark_layer32.pth",
+    "descriptor_difference_method": "cosine"
+}

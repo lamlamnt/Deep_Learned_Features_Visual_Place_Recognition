@@ -11,7 +11,6 @@ def gps_ground_truth(reference_run, query_run, reference_len, query_len):
         ref_name = "0" + str(reference_run)
     else:
         ref_name = str(reference_run)
-        ref_name = ""
     que_name = ""
     if(query_run < 10):
         que_name = "0" + str(query_run)
@@ -56,7 +55,7 @@ def gps_ground_truth(reference_run, query_run, reference_len, query_len):
     plt.xlabel("Query run frame number")
     plt.ylabel("Reference run frame number")
     plot_name = "gps_ground_truth for runs " + str(reference_run)+ " and " + str(query_run) + ".png"
-    plt.savefig(plot_name)
+    plt.savefig("plots/" + plot_name)
     return gps_distance
 
 def plot_similarity(similarity_run, reference_run, query_run):
@@ -64,11 +63,29 @@ def plot_similarity(similarity_run, reference_run, query_run):
     plt.title("Difference in descriptors between runs " + str(reference_run) + " and " + str(query_run))
     similarity_plot = plt.imshow(similarity_run, cmap='viridis', interpolation='nearest')
     colorbar = plt.colorbar(similarity_plot)
+    colorbar.set_label("Cosine similarity")
     plt.xlabel("Query run frame number")
     plt.ylabel("Reference run frame number")
     plot_name = "Descriptor map for runs " + str(reference_run)+ " and " + str(query_run) + ".png"
-    plt.savefig(plot_name)
+    plt.savefig("plots/" + plot_name)
 
 #use gps data to find the total translational error
 def rmse_error(gps_ground_truth,max_similarity_idx):
     pass
+
+#Based on localisation data
+def calculate_success_rate(max_similarity_idx, reference_run, query_run, query_len):
+    que_name = ""
+    if(query_run < 10):
+        que_name = "0" + str(query_run)
+    else:
+        que_name = str(query_run)
+    path = "/Volumes/oridatastore09/ThirdPartyData/utias/inthedark/run_0000" + que_name + "/transforms_spatial.txt"
+    counter = 0
+    with open(path,"r") as file:
+        for i in range(query_len):
+            line = file.readline().strip()  # Read the first line and remove leading/trailing whitespace
+            numbers = line.split(",")
+            if(max_similarity_idx[i] == numbers[3]):
+                counter +=1
+    return float(counter/query_len)

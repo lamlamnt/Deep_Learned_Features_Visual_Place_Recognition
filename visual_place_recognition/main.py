@@ -9,11 +9,10 @@ from scipy.spatial.distance import cdist
 import unet_extraction
 from unet_extraction import LearnedFeatureDetector
 import evaluation_tool
+import argparse
+import json
 
 #Use the pre-trained weights from many runs -> Assume the provided .pth is from the runs listed as training runs
-gps_paths = [0,1,2,5,6,9,10,11,12,13,14,15,16,17,18,19,25,26,27,28,29,30,31]
-test_paths = [2, 11, 16, 17, 23, 28, 35]
-intersection = [2,11,16,17,28]
 
 def path_processing(run):
     name = ""
@@ -33,14 +32,22 @@ def pre_process_image(image_path):
 
 if __name__ == '__main__':
     #Set parameters:
+    parser = argparse.ArgumentParser()
+    parser.add_argument('--config', default=None, type=str,
+                      help='config file path (default: None)')
+
+    args = parser.parse_args()
+    with open(args.config) as f:
+        config = json.load(f)
+
     cuda = True
-    reference_run = 1
-    query_run = 2
+    reference_run = config['reference_run']
+    query_run = config['query_run']
     #Trained for the task of pose estimation
-    network_path = '/home/lamlam/data/networks/network_inthedark_layer32.pth'
+    network_path = config['network_path']
     
     learned_feature_detector = LearnedFeatureDetector(n_channels=3, 
-                                                      layer_size=32, 
+                                                      layer_size=config['layer_size'], 
                                                       window_height=16, 
                                                       window_width=16, 
                                                       image_height=384, 
@@ -77,10 +84,10 @@ if __name__ == '__main__':
         for ref_idx,ref_descriptor in enumerate(reference_descriptors):
             #Use cosine similarity - use the cdist function
             #similarity = F.cosine_similarity(descriptors_maxpool, ref_descriptor,dim=0)
-            similarity = 1.0-cdist(descriptors_maxpool.reshape(1,-1), ref_descriptor.reshape(1,-1), metric = "cosine")
+            similarity = 1.0-cdist(descriptors_maxpool.reshape(1,-1), ref_descriptor.reshape(1,-1), metric = config['descriptor_difference_method'])
             #similarity2 = cdist(descriptors_maxpool.reshape(1,-1), ref_descriptor.reshape(1,-1), metric = "euclidean")
             #Exactly similar -> similarity = 1. 
-            similarity = float(similarity.astype(float))
+            similarity = float(similarity[0,0].astype(float))
             #if(similarity < 0.98):
                 #similarity = 0.9
             similarity_run[ref_idx,idx] = similarity
@@ -93,5 +100,6 @@ if __name__ == '__main__':
     #Evaluation
     gps_distance = evaluation_tool.gps_ground_truth(reference_run,query_run,ref_length,query_length)
     evaluation_tool.plot_similarity(similarity_run, reference_run, query_run)
-    #evaluation_tool.rmse_error(gps_distance,max_similarity_run_index)
-    
+    evaluation_tool.rmse_error(gps_distance,max_similarity_run_index)
+    success_rate = evaluation_tool.calculate_success_rate(max_similarity_run_index,reference_run,query_run,query_length)
+    print(success_rate)

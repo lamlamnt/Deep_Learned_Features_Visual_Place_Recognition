@@ -1,6 +1,10 @@
 {
+    "gps_paths": [0,1,2,5,6,9,10,11,12,13,14,15,16,17,18,19,25,26,27,28,29,30,31],
+    "paths_not_used_for_training":[2, 11, 16, 17, 23, 28, 35],
+    "test_paths":[2,11,16,17,28],
     "reference_run":2,
-    "query_run":11,
-    "network_path": "/home/lamlam/data/networks/network_inthedark_layer32.pth",
+    "query_run":5,
+    "network_path": "/home/lamlam/data/networks/network_multiseason_inthedark_layer16.pth",
+    "layer_size":16,
     "descriptor_difference_method": "cosine"
 }

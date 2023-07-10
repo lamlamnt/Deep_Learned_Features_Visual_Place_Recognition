@@ -85,28 +85,87 @@ class LearnedFeatureDetector(nn.Module):
 
         self.net.eval()
 
+    #Uses L2 Normalization
     def run(self, image_tensor):
         """
             Forward pass of network to get keypoint detector values, descriptors and, scores
-
             Args:
                 image_tensor (torch.tensor, Bx3xHxW): RGB images to input to the network.
-
             Returns:
                 keypoints (torch.tensor, Bx2xN): the detected keypoints, N=number of keypoints.
                 descriptors (torch.tensor, BxCxN): descriptors for each keypoint, C=496 is length of descriptor.
                 scores (torch.tensor, Bx1xN): an importance score for each keypoint.
-
         """
         if self.cuda:
             image_tensor = image_tensor.cuda()
+        detector_scores, scores, descriptors = self.net(image_tensor)
 
+        descriptor_reshaped = descriptors.view(descriptors.size(0), -1)  # (batch_size, height * width * channels)
+        normalized_descriptor = F.normalize(descriptor_reshaped, p=2, dim=1)
+        normalized_descriptor = normalized_descriptor.view(descriptors.size())
+        descriptors_maxpool =F.max_pool2d(normalized_descriptor, kernel_size=(normalized_descriptor.shape[-2], normalized_descriptor.shape[-1]))
+        descriptors_maxpool = descriptors_maxpool.squeeze()
+
+        return descriptors_maxpool.detach().cpu()
+
+    #Uses channel normalization
+    def run2(self, image_tensor):
+        if self.cuda:
+            image_tensor = image_tensor.cuda()
+        detector_scores, scores, descriptors = self.net(image_tensor)
+        descriptor_reshaped = descriptors.view(descriptors.size(0), -1)  # (batch_size, height * width * channels)
+
+        #Normalization part 
+        descriptors_mean = torch.mean(descriptor_reshaped, dim=1, keepdim=True)           # Bx1x(N or HW)
+        descriptors_std = torch.std(descriptor_reshaped, dim=1, keepdim=True)             # Bx1x(N or HW)
+        normalized_descriptor = (descriptor_reshaped - descriptors_mean) / descriptors_std 
+
+        normalized_descriptor = normalized_descriptor.view(descriptors.size())
+        descriptors_maxpool =F.max_pool2d(normalized_descriptor, kernel_size=(normalized_descriptor.shape[-2], normalized_descriptor.shape[-1]))
+        descriptors_maxpool = descriptors_maxpool.squeeze()
+        return descriptors_maxpool.detach().cpu()
+    
+    #Uses L2 normalization and window max-pooling
+    def run3(self,image_tensor):
+        if self.cuda:
+            image_tensor = image_tensor.cuda()
         detector_scores, scores, descriptors = self.net(image_tensor)
         scores = self.sigmoid(scores)
-
-        # Get 2D keypoint coordinates from detector scores, Bx2xN
         keypoints = self.keypoint_block(detector_scores)
-
-        # Get one descriptor and scrore per keypoint, BxCxN, Bx1xN, C=496.
         point_descriptors_norm, point_scores = get_keypoint_info(keypoints, scores, descriptors)
-        return keypoints.detach().cpu(), point_descriptors_norm.detach().cpu(), point_scores.detach().cpu()
+        descriptors_maxpool = point_descriptors_norm.squeeze()
+        descriptors_maxpool = F.max_pool1d(descriptors_maxpool, kernel_size=descriptors.shape[-1])
+        descriptors_maxpool = descriptors_maxpool.squeeze(1)
+        return descriptors_maxpool.detach().cpu()
+    
+    #Uses channel normalization and window max-pooling (original - like Mona)
+    def run4(self,image_tensor):
+        if self.cuda:
+            image_tensor = image_tensor.cuda()
+        detector_scores, scores, descriptors = self.net(image_tensor)
+        scores = self.sigmoid(scores)
+        keypoints = self.keypoint_block(detector_scores)
+        descriptors_norm, point_scores = get_keypoint_info(keypoints, scores, descriptors)
+
+        descriptors_maxpool = descriptors_norm.squeeze()
+        descriptors_maxpool = F.max_pool1d(descriptors_maxpool, kernel_size=descriptors.shape[-1])
+        descriptors_maxpool = descriptors_maxpool.squeeze(1)
+        return descriptors_maxpool.detach().cpu()
+    
+    #multiply by scores before max-pooling
+    def run5(self,image_tensor):
+        if self.cuda:
+            image_tensor = image_tensor.cuda()
+        detector_scores, scores, descriptors = self.net(image_tensor)
+
+        #Element-wise multiplication with scores
+        descriptors = torch.mul(descriptors,detector_scores)
+        
+        descriptor_reshaped = descriptors.view(descriptors.size(0), -1)  # (batch_size, height * width * channels)
+        #L2 normalization
+        normalized_descriptor = F.normalize(descriptor_reshaped, p=2, dim=1)
+        normalized_descriptor = normalized_descriptor.view(descriptors.size())
+        descriptors_maxpool =F.max_pool2d(normalized_descriptor, kernel_size=(normalized_descriptor.shape[-2], normalized_descriptor.shape[-1]))
+        descriptors_maxpool = descriptors_maxpool.squeeze()
+
+        return descriptors_maxpool.detach().cpu()

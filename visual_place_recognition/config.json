@@ -3,8 +3,15 @@
     "paths_not_used_for_training":[2, 11, 16, 17, 23, 28, 35],
     "test_paths":[2,11,16,17,28],
     "reference_run":2,
-    "query_run":5,
-    "network_path": "/home/lamlam/data/networks/network_multiseason_inthedark_layer16.pth",
-    "layer_size":16,
-    "descriptor_difference_method": "cosine"
+    "query_run":16,
+    "list_of_network_paths": ["network_inthedark_136.pth", "network_multiseason_inthedark_layer16.pth", "network_inthedark_layer32.pth"],
+    "network_path": "/home/lamlam/data/networks/network_inthedark_layer32.pth",
+    "layer_size":32,
+    "descriptor_difference_method": "cosine",
+    "sampling_method":"downsampled",
+    "first_num_frames": 500,
+    "path_length":260,
+    "number_meter_per_frame":0.5,
+    "success_threshold_in_m": [5,10],
+    "experiment_name": "experiment_2"
 }

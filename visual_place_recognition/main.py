@@ -12,17 +12,35 @@ import evaluation_tool
 import argparse
 import json
 
-#Use the pre-trained weights from many runs -> Assume the provided .pth is from the runs listed as training runs
-
-def path_processing(run):
+def path_processing(run, query_bool):
     name = ""
     if(run < 10):
         name = "0" + str(run)
     else:
         name = str(run)
-    #This is a list
-    images_path = glob.glob("/Volumes/oridatastore09/ThirdPartyData/utias/inthedark/run_0000" + name + "/images/left/*.png")
-    return images_path, len(images_path)
+    #First n frames
+    if(config["sampling_method"] == "first_frames"):
+        images_path = []
+        for i in range(config["first_num_frames"]):
+            padded_string = '{:0{}}'.format(i, 6)
+            images_path.append("/Volumes/oridatastore09/ThirdPartyData/utias/inthedark/run_0000" + name + "/images/left/" + padded_string + ".png")
+            incre = 1
+    else:
+        images_path = glob.glob("/Volumes/oridatastore09/ThirdPartyData/utias/inthedark/run_0000" + name + "/images/left/*.png")
+        gps_path ="/Volumes/oridatastore09/ThirdPartyData/utias/inthedark/run_0000" + name + "/gps.txt"
+        with open(gps_path, 'r') as file:
+            line_count = 0
+            for line in file:
+                line_count += 1
+        #Some images at the end are missing gps data
+        difference = len(images_path) - line_count
+        if(difference > 0):
+            images_path = images_path[:-difference]
+        #Downsampled
+        if(config["sampling_method"] == "downsampled"):
+            incre = int(round(line_count*config["number_meter_per_frame"]/config["path_length"]))
+            images_path = sorted(images_path)[::incre]
+    return images_path, len(images_path), incre
 
 def pre_process_image(image_path):
     image = cv2.imread(image_path)
@@ -31,11 +49,10 @@ def pre_process_image(image_path):
     return tensor[None,:,:,:]
 
 if __name__ == '__main__':
-    #Set parameters:
+    #Load parameters:
     parser = argparse.ArgumentParser()
     parser.add_argument('--config', default=None, type=str,
                       help='config file path (default: None)')
-
     args = parser.parse_args()
     with open(args.config) as f:
         config = json.load(f)
@@ -55,8 +72,8 @@ if __name__ == '__main__':
                                                       checkpoint_path=network_path,
                                                       cuda=cuda)
     #Reference path is a list 
-    reference_path, ref_length = path_processing(reference_run)
-    query_path, query_length = path_processing(query_run)
+    reference_path, ref_length, incre_ref = path_processing(reference_run, query_bool = False)
+    query_path, query_length, incre_query = path_processing(query_run, query_bool = True)
     transform = transforms.Compose([transforms.ToTensor()])
     reference_descriptors = []
     max_similarity_run = np.zeros(query_length,dtype=float)
@@ -64,42 +81,52 @@ if __name__ == '__main__':
     similarity_run = np.zeros((ref_length,query_length),dtype=float)
 
     #Extract keypoints, scores, and descriptors (max pooling) from the reference run and query run
-    #Using this means it's not done in order
+    #Not done in order
+    print("Start doing inference on reference images")
     for frame_path in reference_path:
-        #Normalized. #descriptors has size {1,992,768}. Sparse (with one descriptor for each keypoint)
-        keypoints, descriptors, scores = learned_feature_detector.run(pre_process_image(frame_path))
-        #Use maxpooling
-        descriptors_maxpool = descriptors.squeeze()
-        descriptors_maxpool = F.max_pool1d(descriptors_maxpool, kernel_size=descriptors.shape[-1])
-        descriptors_maxpool = descriptors_maxpool.squeeze(1)
-        reference_descriptors.append(descriptors_maxpool)
+        descriptors = learned_feature_detector.run5(pre_process_image(frame_path))
+        reference_descriptors.append(descriptors)
+    print("Finish processing reference frames")
 
     for idx,frame_path in enumerate(query_path):
-        keypoints, descriptors, scores = learned_feature_detector.run(pre_process_image(frame_path))
-        descriptors_maxpool = descriptors.squeeze()
-        descriptors_maxpool = F.max_pool1d(descriptors_maxpool, kernel_size=descriptors.shape[-1])
-        descriptors_maxpool = descriptors_maxpool.squeeze(1)
+        descriptors_maxpool= learned_feature_detector.run5(pre_process_image(frame_path))
         max_similarity = 0
         max_index = 0
         for ref_idx,ref_descriptor in enumerate(reference_descriptors):
-            #Use cosine similarity - use the cdist function
-            #similarity = F.cosine_similarity(descriptors_maxpool, ref_descriptor,dim=0)
+            #Use cosine similarity 
             similarity = 1.0-cdist(descriptors_maxpool.reshape(1,-1), ref_descriptor.reshape(1,-1), metric = config['descriptor_difference_method'])
-            #similarity2 = cdist(descriptors_maxpool.reshape(1,-1), ref_descriptor.reshape(1,-1), metric = "euclidean")
             #Exactly similar -> similarity = 1. 
             similarity = float(similarity[0,0].astype(float))
-            #if(similarity < 0.98):
-                #similarity = 0.9
             similarity_run[ref_idx,idx] = similarity
             if(similarity > max_similarity):
                 max_similarity = similarity
                 max_index = ref_idx
             max_similarity_run[idx] = max_similarity
             max_similarity_run_index[idx] = max_index
+    print("Finish calculating similarity")
 
     #Evaluation
-    gps_distance = evaluation_tool.gps_ground_truth(reference_run,query_run,ref_length,query_length)
-    evaluation_tool.plot_similarity(similarity_run, reference_run, query_run)
-    evaluation_tool.rmse_error(gps_distance,max_similarity_run_index)
-    success_rate = evaluation_tool.calculate_success_rate(max_similarity_run_index,reference_run,query_run,query_length)
-    print(success_rate)
+    gps_distance, ref_gps, query_gps = evaluation_tool.gps_ground_truth(reference_run,query_run,ref_length,query_length, incre_ref, incre_query)
+    print("Finish calculating gps ground truth")
+    
+    evaluation_tool.plot_similarity(similarity_run, reference_run, query_run, config["sampling_method"])
+    
+    threshold_list = config["success_threshold_in_m"]
+    success_rate, average_error = evaluation_tool.calculate_success_rate_list(max_similarity_run_index,ref_gps,query_gps,threshold_list)
+    for idx,rate in enumerate(success_rate):
+        print("Success rate at threshold " + str(config["success_threshold_in_m"][idx]) + "m is " + str(rate))
+    
+    print("Average error in meters: " + str(average_error))
+    print("Finish evaluation")
+
+    #Write to a file for record keeping
+    file_path = "results/" + config["experiment_name"] + ".txt"
+    file = open(file_path,"w+")
+    for key, value in config.items():
+        file.write(f"{key}: {value}\n")
+    for idx,rate in enumerate(success_rate):
+        file.write("Success rate at threshold " + str(config["success_threshold_in_m"][idx]) + "m is " + str(rate) + "\n")
+    file.write("Average error in meters: " + str(average_error))
+    file.close()
+
+

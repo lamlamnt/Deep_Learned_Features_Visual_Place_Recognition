@@ -108,3 +108,11 @@ def calculate_success_rate_list(max_similarity_idx, ref_gps, query_gps, threshol
         sum += distance
     #Returns the success rate and the average distance error
     return np.sum(success,axis=0)/len(max_similarity_idx),float(sum/len(max_similarity_idx))
+
+def plot_scores(scores):
+    plt.figure()
+    plt.title("Scores Histogram")
+    plt.hist(scores,bins=20)
+    plt.xlabel("Scores")
+    plt.ylabel("Frequency")
+    plt.savefig("plots/" + "scores_histogram_final")

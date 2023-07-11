@@ -84,19 +84,13 @@ if __name__ == '__main__':
     #Not done in order
     print("Start doing inference on reference images")
 
-    """
     for frame_path in reference_path:
-        descriptors = learned_feature_detector.run5(pre_process_image(frame_path))
-        reference_descriptors.append(descriptors)
-    """
-    #This ensures it's in order, thought might be a bit slower
-    for i in range(len(reference_path)):
-        descriptors = learned_feature_detector.run5(pre_process_image(reference_path[i]))
+        descriptors = learned_feature_detector.run7(pre_process_image(frame_path))
         reference_descriptors.append(descriptors)
     print("Finish processing reference frames")
 
     for idx,frame_path in enumerate(query_path):
-        descriptors_maxpool= learned_feature_detector.run5(pre_process_image(frame_path))
+        descriptors_maxpool= learned_feature_detector.run7(pre_process_image(frame_path))
         max_similarity = 0
         max_index = 0
         for ref_idx,ref_descriptor in enumerate(reference_descriptors):

@@ -7,6 +7,7 @@ import torch.nn as nn
 import torch.nn.functional as F
 from torchvision import transforms
 import cv2
+import matplotlib.pyplot as plt
 
 sys.path.append("/home/lamlam/code/deep_learned_visual_features")
 from src.model.unet import UNet
@@ -158,14 +159,64 @@ class LearnedFeatureDetector(nn.Module):
             image_tensor = image_tensor.cuda()
         detector_scores, scores, descriptors = self.net(image_tensor)
 
-        #Element-wise multiplication with scores
-        descriptors = torch.mul(descriptors,detector_scores)
+        descriptors = torch.mul(descriptors,scores)
         
-        descriptor_reshaped = descriptors.view(descriptors.size(0), -1)  # (batch_size, height * width * channels)
         #L2 normalization
+        descriptor_reshaped = descriptors.view(descriptors.size(0), -1)  # (batch_size, height * width * channels)
         normalized_descriptor = F.normalize(descriptor_reshaped, p=2, dim=1)
         normalized_descriptor = normalized_descriptor.view(descriptors.size())
         descriptors_maxpool =F.max_pool2d(normalized_descriptor, kernel_size=(normalized_descriptor.shape[-2], normalized_descriptor.shape[-1]))
         descriptors_maxpool = descriptors_maxpool.squeeze()
 
         return descriptors_maxpool.detach().cpu()
+    
+    #Also returns scores
+    def run6(self,image_tensor):
+        if self.cuda:
+            image_tensor = image_tensor.cuda()
+        detector_scores, scores, descriptors = self.net(image_tensor)
+        keypoints = self.keypoint_block(detector_scores)
+        descriptors_norm, point_scores = get_keypoint_info(keypoints, scores, descriptors)
+        
+        clustering.cluster(descriptors_norm)
+        #Plot point scores
+        plt.figure()
+        plt.title("Scores Histogram (768)")
+        plt.hist(point_scores.squeeze().detach().cpu(),bins=20)
+        plt.xlabel("Scores")
+        plt.ylabel("Frequency")
+        plt.savefig("plots/" + "scores_histogram_768.png")
+
+        descriptors_maxpool = descriptors_norm.squeeze()
+        descriptors_maxpool = F.max_pool1d(descriptors_maxpool, kernel_size=descriptors.shape[-1])
+        descriptors_maxpool = descriptors_maxpool.squeeze(1)
+        return descriptors_maxpool.detach().cpu()
+    
+    def run7(self,image_tensor):
+        if self.cuda:
+            image_tensor = image_tensor.cuda()
+        detector_scores, scores, descriptors = self.net(image_tensor)
+
+        #Eliminate descriptors with scores less than 0.1
+        descriptors_eliminated = descriptors.view(descriptors.size(1),-1)
+        scores = scores.view(scores.size(2)*scores.size(3))
+        #chosen_descriptors = descriptors_eliminated[:, scores > 0.4].detach().cpu().t().tolist()
+        chosen_descriptors = descriptors_eliminated[:, scores > 0.4].detach().cpu().t()
+        """
+        chosen_descriptors = []
+        for idx,value in enumerate(scores):
+            if(scores[idx] > 0.4):
+                chosen_descriptors.append(descriptors_eliminated[:,idx].detach().cpu())
+        """
+        #Do clustering with the chosen descriptors 
+        #clustering.cluster2(chosen_descriptors)
+
+        #L2 normalization
+        descriptor_reshaped = descriptors.view(descriptors.size(0), -1)   # (batch_size, height * width * channels)
+        normalized_descriptor = F.normalize(descriptor_reshaped, p=2, dim=1)
+        normalized_descriptor = normalized_descriptor.view(descriptors.size())
+        descriptors_maxpool =F.max_pool2d(normalized_descriptor, kernel_size=(normalized_descriptor.shape[-2], normalized_descriptor.shape[-1]))
+        descriptors_maxpool = descriptors_maxpool.squeeze()
+
+        return descriptors_maxpool.detach().cpu()
+

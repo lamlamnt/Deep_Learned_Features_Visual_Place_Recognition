@@ -71,8 +71,25 @@ class LearnedFeatureDetector(nn.Module):
         descriptors_eliminated = descriptors.view(descriptors.size(1),-1)
         scores = scores.view(scores.size(2)*scores.size(3))
         chosen_descriptors = descriptors_eliminated[:, scores > score_threshold].detach().cpu().t().tolist()
+
         #List of list
         return chosen_descriptors
+    
+    def run_L1_normalize(self,image_tensor,score_threshold):
+        #Do L1 normalization
+        if self.cuda:
+            image_tensor = image_tensor.cuda()
+        detector_scores, scores, descriptors = self.net(image_tensor)
+
+        #Eliminate descriptors with scores less than a threshold
+        descriptors_eliminated = descriptors.view(descriptors.size(1),-1)
+        scores = scores.view(scores.size(2)*scores.size(3))
+        chosen_descriptors = descriptors_eliminated[:, scores > score_threshold].detach().cpu().t()
+        print(chosen_descriptors.size())
+
+        normalized_descriptor = F.normalize(chosen_descriptors, p=1, dim=0)
+        print(normalized_descriptor.size())
+        
     
     
         

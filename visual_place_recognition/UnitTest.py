@@ -1,6 +1,7 @@
 from haversine import haversine
 import numpy as np
 import torch
+from scipy.stats import wasserstein_distance
 
 def calculate_success_rate(max_similarity_idx, ref_gps, query_gps, threshold):
     #Get the gps data of the the max_similarity_idx in the reference run
@@ -23,6 +24,10 @@ query_gps = np.array([[43.782160,-79.465760,147.52],[43.781800,-79.464763,153.99
 #print(success_rate)
 #print(error)
 
-tensor1 = [[[1,2,3],[4,5,6]],[[7,8,9],[10,11,12]]]
-tensor2 = torch.arrange(0,3)
-torch.mul(tensor1,tensor2)
+#tensor1 = [[[1,2,3],[4,5,6]],[[7,8,9],[10,11,12]]]
+#tensor2 = torch.arrange(0,3)
+#torch.mul(tensor1,tensor2)
+
+a = [1,2,3,4,5]
+b = [0,0,0,0,0]
+print(wasserstein_distance(a,b))

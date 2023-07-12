@@ -16,8 +16,7 @@ from umap import UMAP
 import pandas as pd
 import matplotlib.pyplot as plt
 
-def path_processing_validate(config):
-    run = config["validation_run"]
+def path_processing_validate(run, config):
     name = ""
     if(run < 10):
         name = "0" + str(run)

@@ -21,6 +21,8 @@ import sys
 sys.path.append("/home/lamlam/code/visual_place_recognition")
 import evaluation_tool
 
+#Downsample one run to 25 frames, get a list of descriptors, do dbscan clustering, and get average element for each cluster
+
 if __name__ == '__main__':
     #Load parameters:
     parser = argparse.ArgumentParser()
@@ -42,23 +44,14 @@ if __name__ == '__main__':
     
     #Get clusters from validation run
     descriptors_list = []
-    images_path = path_processing.path_processing_validate(config["validation_run"], config)
-    #images_path_dark = path_processing.path_processing_validate(config["validation_run_dark"], config)
-    #images_path = images_path + images_path_dark
+    images_path = path_processing.path_processing_validate(config)
     for frame_path in images_path:
         #List of descriptors of size {996}
         descriptors = learned_feature_detector.run(path_processing.pre_process_image(frame_path),config["score_threshold_to_be_chosen"])
         descriptors_list = descriptors_list + descriptors #list of list
 
     #Do clustering -> list_descriptors is a list of around 100 tensors of size {992}
-    list_descriptors = clustering.cluster_dbscan(descriptors_list, config)
-
-    print("K-means")
-    nparray_kmeans = clustering.cluster_kmeans(descriptors_list,config)
-    
-    #Convert this to list of tensors to tensors
-    list_descriptors = torch.stack(list_descriptors)
-
+    list_descriptors = clustering.cluster_dbscan(descriptors_list)
     print("Finish finding clusters from validation run")
     
     #Get histogram from reference run
@@ -68,13 +61,11 @@ if __name__ == '__main__':
     query_path, query_length, incre_query = path_processing.path_process_ref_que(query_run, config)
     max_similarity_run_index = np.zeros(query_length,dtype=int)
     ref_count = []
-    similarity_run = np.zeros((ref_length,query_length),dtype=float)
 
     print("Start doing inference on reference images")
-    #Must be done in order -> otherwise the appending will be messed up. Can initialize the ref_count first if don't want to do in order
-    for i in range (len(reference_path)):
+    for frame_path in reference_path:
         #List of tensors
-        descriptors = learned_feature_detector.run(path_processing.pre_process_image(reference_path[i]),config["score_threshold_to_be_chosen"])
+        descriptors = learned_feature_detector.run(path_processing.pre_process_image(frame_path),config["score_threshold_to_be_chosen"])
         descriptors = torch.tensor(descriptors)  #size {664,992}
 
         count = np.zeros(len(list_descriptors),dtype=int)
@@ -83,19 +74,16 @@ if __name__ == '__main__':
         #Organize the chosen descriptors into the clusters found above
         for idx,value in enumerate(descriptors):
             #1d np array of size around 100 and the values are the counts
-            """
             for center_label, center in enumerate(list_descriptors):
                 #Find cosine similarity between the descriptor and each of the cluster's center
                 similarity = 1.0-cdist(value.unsqueeze(0), center.unsqueeze(0), metric = "cosine")
                 if(similarity > max_sim):
                     max_sim = similarity
                     label = center_label
-            """
-            similarities = 1.0 - cdist(value[None, :], list_descriptors, metric="cosine")
-            label = np.argmax(similarities)
             count[label] +=1
+        ####CANNOT DO THIS BECAUSE NOT IN ORDER
         ref_count.append(count)
-    print(ref_count)
+
 
     print("Start doing inference on query run")
     for frame_index,frame_path in enumerate(query_path):
@@ -109,34 +97,27 @@ if __name__ == '__main__':
         #Organize the chosen descriptors into the clusters found above
         for idx,value in enumerate(descriptors):
             #1d np array of size around 100 and the values are the counts
-            """
             for center_label, center in enumerate(list_descriptors):
                 #Find cosine similarity between the descriptor and each of the cluster's center
                 similarity = 1.0-cdist(value.unsqueeze(0), center.unsqueeze(0), metric = "cosine")
                 if(similarity > max_sim):
                     max_sim = similarity
                     label = center_label
-            """
-            similarities = 1.0 - cdist(value[None, :], list_descriptors, metric="cosine")
-            label = np.argmax(similarities)
             count[label] +=1
 
         #Compare histograms of reference and query runs
-        #Cannot do vectorized operation because wassterstein_distance doesn't support that
         min_distance = 1000
         min_index = 0
         for index,value in enumerate(ref_count):
-            distance = wasserstein_distance(count,value)
-            similarity_run[index,frame_index] = distance
+            distance = wasserstein_distance(count,ref_count)
             if(distance < min_distance):
                 min_distance = distance
                 min_index = index
         max_similarity_run_index[frame_index] = min_index
-        
+    print(max_similarity_run_index)
+
     print("Start evaluation")
     gps_distance, ref_gps, query_gps = evaluation_tool.gps_ground_truth(reference_run,query_run,ref_length,query_length, incre_ref, incre_query)
-    evaluation_tool.plot_similarity_wasserstein(similarity_run, reference_run, query_run)
-    
     threshold_list = config["success_threshold_in_m"]
     success_rate, average_error = evaluation_tool.calculate_success_rate_list(max_similarity_run_index,ref_gps,query_gps,threshold_list)
     for idx,rate in enumerate(success_rate):

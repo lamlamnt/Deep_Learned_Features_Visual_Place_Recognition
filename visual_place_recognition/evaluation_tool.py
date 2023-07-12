@@ -58,7 +58,7 @@ def gps_ground_truth(reference_run, query_run, reference_len, query_len, increme
     plt.xlabel("Query run frame number")
     plt.ylabel("Reference run frame number")
     plot_name = "gps_ground_truth for runs " + str(reference_run)+ " and " + str(query_run) + ".png"
-    plt.savefig("plots/" + plot_name)
+    plt.savefig("/home/lamlam/code/visual_place_recognition/plots/" + plot_name)
 
     """
     #Plot the gps actual values to check for accuracy
@@ -83,7 +83,18 @@ def plot_similarity(similarity_run, reference_run, query_run, sampling_method):
     plt.xlabel("Query run frame number")
     plt.ylabel("Reference run frame number")
     plot_name = "Descriptor map for runs " + str(reference_run)+ " and " + str(query_run) + " - " + sampling_method + ".png"
-    plt.savefig("plots/" + plot_name)
+    plt.savefig("/home/lamlam/code/visual_place_recognition/plots" + plot_name)
+
+def plot_similarity_wasserstein(similarity_run, reference_run, query_run):
+    plt.figure()
+    plt.title("EDM between runs " + str(reference_run) + " and " + str(query_run))
+    similarity_plot = plt.imshow(similarity_run, cmap='viridis', interpolation='nearest')
+    colorbar = plt.colorbar(similarity_plot)
+    colorbar.set_label("EDM")
+    plt.xlabel("Query run frame number")
+    plt.ylabel("Reference run frame number")
+    plot_name = "Threshold_EDM map for runs " + str(reference_run)+ " and " + str(query_run) + ".png"
+    plt.savefig("/home/lamlam/code/visual_place_recognition/plots/" + plot_name)
 
 def calculate_success_rate(max_similarity_idx, ref_gps, query_gps, threshold):
     #Get the gps data of the the max_similarity_idx in the reference run

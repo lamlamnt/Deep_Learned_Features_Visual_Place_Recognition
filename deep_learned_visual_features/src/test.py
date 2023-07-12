@@ -208,7 +208,7 @@ def main(config):
     results_path = f"{config['home_path']}/results/{config['experiment_name']}/"
     checkpoints_path = f"{config['home_path']}/networks"
     #data_path = f"{config['home_path']}/data"
-    data_path = "/home/shared/utias_datasets"
+    data_path = "/Volumes/oridatastore09/ThirdPartyData/utias/"
     datasets_path = f"{config['home_path']}/datasets"
 
     checkpoint_name = config['checkpoint_name']

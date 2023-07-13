@@ -1,7 +1,7 @@
 {
   "home_path": "/home/lamlam/data",
 
-  "experiment_name": "test_model_inthedark_verify",
+  "experiment_name": "test_model_inthedark_2_11",
   "dataset_name": "inthedark",
   "checkpoint_name": "network_inthedark_layer32",
 

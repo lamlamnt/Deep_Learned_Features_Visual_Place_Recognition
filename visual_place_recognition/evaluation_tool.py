@@ -85,15 +85,15 @@ def plot_similarity(similarity_run, reference_run, query_run, sampling_method):
     plot_name = "Descriptor map for runs " + str(reference_run)+ " and " + str(query_run) + " - " + sampling_method + ".png"
     plt.savefig("/home/lamlam/code/visual_place_recognition/plots" + plot_name)
 
-def plot_similarity_wasserstein(similarity_run, reference_run, query_run):
+def plot_similarity_clustering(similarity_run, reference_run, query_run, method):
     plt.figure()
-    plt.title("EDM between runs " + str(reference_run) + " and " + str(query_run))
+    plt.title("Similarity between runs " + str(reference_run) + " and " + str(query_run))
     similarity_plot = plt.imshow(similarity_run, cmap='viridis', interpolation='nearest')
     colorbar = plt.colorbar(similarity_plot)
-    colorbar.set_label("EDM")
+    colorbar.set_label(method)
     plt.xlabel("Query run frame number")
     plt.ylabel("Reference run frame number")
-    plot_name = "Threshold_EDM map for runs " + str(reference_run)+ " and " + str(query_run) + ".png"
+    plot_name = "Similarity clustering map for runs " + str(reference_run)+ " and " + str(query_run) + ".png"
     plt.savefig("/home/lamlam/code/visual_place_recognition/plots/" + plot_name)
 
 def calculate_success_rate(max_similarity_idx, ref_gps, query_gps, threshold):

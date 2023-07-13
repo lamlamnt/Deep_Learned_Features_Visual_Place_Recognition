@@ -178,7 +178,7 @@ class LearnedFeatureDetector(nn.Module):
         keypoints = self.keypoint_block(detector_scores)
         descriptors_norm, point_scores = get_keypoint_info(keypoints, scores, descriptors)
         
-        clustering.cluster(descriptors_norm)
+        #clustering.cluster(descriptors_norm)
         #Plot point scores
         plt.figure()
         plt.title("Scores Histogram (768)")

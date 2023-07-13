@@ -14,6 +14,13 @@ from src.model.keypoint_block import KeypointBlock
 from src.utils.keypoint_tools import normalize_coords, get_norm_descriptors, get_scores
 from src.dataset import Dataset
 
+def get_keypoint_info(kpt_2D, scores_map, descriptors_map):
+    batch_size, _, height, width = scores_map.size()
+    kpt_2D_norm = normalize_coords(kpt_2D, batch_size, height, width).unsqueeze(1)  # Bx1xNx2
+    kpt_desc_norm = get_norm_descriptors(descriptors_map, True, kpt_2D_norm)
+    kpt_scores = get_scores(scores_map, kpt_2D_norm)
+    return kpt_desc_norm, kpt_scores
+
 class LearnedFeatureDetector(nn.Module):
     """ 
         Class to detect learned features.
@@ -84,11 +91,26 @@ class LearnedFeatureDetector(nn.Module):
         #Eliminate descriptors with scores less than a threshold
         descriptors_eliminated = descriptors.view(descriptors.size(1),-1)
         scores = scores.view(scores.size(2)*scores.size(3))
-        chosen_descriptors = descriptors_eliminated[:, scores > score_threshold].detach().cpu().t()
-        print(chosen_descriptors.size())
+        #chosen_descriptors = descriptors_eliminated[:, scores > score_threshold].detach().cpu().t()
+        chosen_descriptors = descriptors_eliminated[:, scores > score_threshold].t()
+        
+        #of size {n,992}
+        normalized_descriptor = F.normalize(chosen_descriptors, p=1, dim=1)
+        return normalized_descriptor.tolist()
+    
+    def run_window_normalize(self,image_tensor,score_threshold):
+        if self.cuda:
+            image_tensor = image_tensor.cuda()
+        detector_scores, scores, descriptors = self.net(image_tensor)
+        keypoints = self.keypoint_block(detector_scores)
+        #Involves normalizing across RGB. Descriptors_norm size {1,992,768}
+        descriptors_norm, point_scores = get_keypoint_info(keypoints, scores, descriptors)
+        normalized_descriptor = F.normalize(descriptors_norm.squeeze(), p=2, dim=0).t()
+        #size {992,768} -> {768,992} after transposing
+        return normalized_descriptor.tolist()
 
-        normalized_descriptor = F.normalize(chosen_descriptors, p=1, dim=0)
-        print(normalized_descriptor.size())
+
+       
         
     
     

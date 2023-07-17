@@ -173,3 +173,5 @@ def get_localized_frame(query_run,query_len, incre_ref,incre_que):
     localized_frames = np.round(localized_frames).astype(int)
     np.savetxt("/home/lamlam/code/visual_place_recognition/clustering/localized_frames.txt",localized_frames)
     return localized_frames
+
+

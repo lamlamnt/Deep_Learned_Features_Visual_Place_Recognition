@@ -18,6 +18,7 @@
     "reference_run":0,
     "query_run":16,
     "path_length":260,
+    "downsampled": "yes",
     "number_meter_per_frame":0.5,
     "success_threshold_in_m": [5,10],
     "compressed_options":["no","svd","spectral_decomposition"],

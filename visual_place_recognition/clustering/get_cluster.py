@@ -158,12 +158,11 @@ if __name__ == '__main__':
     
     np.savetxt("/home/lamlam/code/visual_place_recognition/clustering/A.txt",similarity_A)
     np.savetxt("/home/lamlam/code/visual_place_recognition/clustering/B.txt",similarity_B)
-    np.savetxt("/home/lamlam/code/visual_place_recognition/clustering/similarity_matrix.txt",similarity_run)
+    np.savetxt("/home/lamlam/code/visual_place_recognition/clustering/similarity_matrix_test.txt",similarity_run)
+    np.savetxt("/home/lamlam/code/visual_place_recognition/clustering/chosen_frames.txt",max_similarity_run_index)
 
     print("Start evaluation")
     gps_distance, ref_gps, query_gps = evaluation_tool.gps_ground_truth(reference_run,query_run,ref_length,query_length, incre_ref, incre_query)
-    print(ref_gps[270])
-    print(query_gps[310])
     evaluation_tool.plot_similarity_clustering(similarity_run, reference_run, query_run,config["histogram_comparison_method"])
     
     threshold_list = config["success_threshold_in_m"]
@@ -173,3 +172,7 @@ if __name__ == '__main__':
     
     print("Average error in meters: " + str(average_error))
     print("Finish evaluation")
+
+    #Write to a file
+
+

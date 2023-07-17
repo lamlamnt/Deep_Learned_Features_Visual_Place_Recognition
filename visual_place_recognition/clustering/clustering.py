@@ -77,7 +77,7 @@ def cluster_dbscan(descriptor_list, config):
     return representative_elements
 
 def cluster_kmeans(descriptor_list, config):
-    Kmean = KMeans(n_clusters=config["kmeans_num_clusters"]).fit(descriptor_list)
+    Kmean = KMeans(n_clusters=config["kmeans_num_clusters"], n_init = 10, max_iter = 400, random_state = 42).fit(descriptor_list)
     #Labels has shape (24,000,). Representative_elements has shape (n,992)
     representative_elements = Kmean.cluster_centers_
     

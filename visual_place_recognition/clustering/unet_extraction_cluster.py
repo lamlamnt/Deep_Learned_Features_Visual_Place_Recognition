@@ -105,7 +105,7 @@ class LearnedFeatureDetector(nn.Module):
         keypoints = self.keypoint_block(detector_scores)
         #Involves normalizing across RGB. Descriptors_norm size {1,992,768}
         descriptors_norm, point_scores = get_keypoint_info(keypoints, scores, descriptors)
-        normalized_descriptor = F.normalize(descriptors_norm.squeeze(), p=2, dim=0).t()
+        normalized_descriptor = F.normalize(descriptors_norm.squeeze(), p=1, dim=0).t()
         #size {992,768} -> {768,992} after transposing
         return normalized_descriptor.tolist()
 

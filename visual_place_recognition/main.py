@@ -119,7 +119,7 @@ if __name__ == '__main__':
     evaluation_tool.plot_similarity(similarity_run, reference_run, query_run, config["sampling_method"])
     
     threshold_list = config["success_threshold_in_m"]
-    success_rate, average_error = evaluation_tool.calculate_success_rate_list(max_similarity_run_index,ref_gps,query_gps,threshold_list)
+    success_rate, average_error = evaluation_tool.calculate_success_rate_list(max_similarity_run_index,ref_gps,query_gps,threshold_list, reference_run, query_run, incre_ref,incre_query)
     for idx,rate in enumerate(success_rate):
         print("Success rate at threshold " + str(config["success_threshold_in_m"][idx]) + "m is " + str(rate))
     

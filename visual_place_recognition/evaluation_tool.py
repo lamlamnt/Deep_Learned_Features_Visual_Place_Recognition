@@ -72,6 +72,8 @@ def gps_ground_truth(reference_run, query_run, reference_len, query_len, increme
     plt.savefig("plots/" + plot_name)
     """
     #Get the max distance difference:
+    np.savetxt("/home/lamlam/code/visual_place_recognition/clustering/query_gps.txt",query_gps)
+    np.savetxt("/home/lamlam/code/visual_place_recognition/clustering/ref_gps.txt",ref_gps)
     return gps_distance, ref_gps, query_gps
 
 def plot_similarity(similarity_run, reference_run, query_run, sampling_method):
@@ -96,28 +98,33 @@ def plot_similarity_clustering(similarity_run, reference_run, query_run, method)
     plot_name = "Similarity clustering map for runs " + str(reference_run)+ " and " + str(query_run) + ".png"
     plt.savefig("/home/lamlam/code/visual_place_recognition/plots/" + plot_name)
 
-def calculate_success_rate(max_similarity_idx, ref_gps, query_gps, threshold):
-    #Get the gps data of the the max_similarity_idx in the reference run
-    success = np.zeros(len(max_similarity_idx))
-    sum = 0
-    for index,value in enumerate(max_similarity_idx):
-        distance = haversine((ref_gps[value,0], ref_gps[value,1]),(query_gps[index,0], query_gps[index,1]),unit="m")
-        if(distance <= threshold):
-            success[index] = 1
-        sum += distance
-    #Returns the success rate and the average distance error
-    return float(np.sum(success)/len(max_similarity_idx)),float(sum/len(max_similarity_idx))
+def plot_distance(distance_frame, reference_run, query_run):
+    plt.figure()
+    plt.title("Distance error for runs " + str(reference_run) + " and " + str(query_run))
+    plt.plot(distance_frame)
+    plt.xlabel("Query run frame number")
+    plt.ylabel("Meters")
+    plot_name = "Distance_error_" + str(reference_run) + "_" + str(query_run) + ".png"
+    plt.savefig("/home/lamlam/code/visual_place_recognition/clustering/plot_visualize_cluster/" + plot_name)
 
-def calculate_success_rate_list(max_similarity_idx, ref_gps, query_gps, threshold_list):
+def calculate_success_rate_list(max_similarity_idx, ref_gps, query_gps, threshold_list, reference_run, query_run, incre_ref,incre_que):
     success = np.zeros((len(max_similarity_idx),len(threshold_list)),dtype=int)
     sum = 0
+    distance_frame = []
     for index,value in enumerate(max_similarity_idx):
         distance = haversine((ref_gps[value,0], ref_gps[value,1]),(query_gps[index,0], query_gps[index,1]),unit="m")
+        distance_frame.append(distance)
+        print("Query frame num: " + str(index) + " Reference frame num: " + str(value))
+        print("Distance is " + str(distance))
         for threshold_idx,threshold in enumerate(threshold_list):
             if(distance <= threshold):
                 success[index,threshold_idx] = 1
         sum += distance
     #Returns the success rate and the average distance error
+    plot_distance(distance_frame,reference_run, query_run)
+    #Localized frame to run 0 
+    localized_frame = get_localized_frame(query_run,len(query_gps),incre_ref,incre_que)
+    plot_chosen_frame(max_similarity_idx,localized_frame,reference_run,query_run)
     return np.sum(success,axis=0)/len(max_similarity_idx),float(sum/len(max_similarity_idx))
 
 def plot_scores(scores):
@@ -127,3 +134,42 @@ def plot_scores(scores):
     plt.xlabel("Scores")
     plt.ylabel("Frequency")
     plt.savefig("plots/" + "scores_histogram_final")
+
+def plot_chosen_frame(indices, localized_frame, reference_run, query_run):
+    #Plot the chosen frames 
+    plt.figure()
+    plt.title("Chosen reference frame for runs " + str(reference_run) + " and " + str(query_run))
+    plt.plot(indices)
+    if(reference_run == 0):
+        plt.plot(localized_frame)
+    plt.xlabel("Query run")
+    plt.ylabel("Reference run")
+    plot_name = "Localisation_" + str(reference_run) + "_" + str(query_run) + ".png"
+    plt.savefig("/home/lamlam/code/visual_place_recognition/clustering/plot_visualize_cluster/" + plot_name)
+
+def plot_singular_values(S):
+    plt.title("Magnitude of singular values")
+    plt.plot(S)
+    plt.xlabel("Nth singular value in descending order")
+    plt.ylabel("Magnitude of singular value")
+    plot_name = "Magnitude_Singular_Values.png"
+    plt.savefig("/home/lamlam/code/visual_place_recognition/clustering/plot_visualize_cluster/" + plot_name)
+
+def get_localized_frame(query_run,query_len, incre_ref,incre_que):
+    if(query_run < 10):
+        name = "0" + str(query_run)
+    else:
+        name = str(query_run)
+    transform_path = "/Volumes/oridatastore09/ThirdPartyData/utias/inthedark/run_0000" + name + "/transforms_spatial.txt"
+    localized_frames = np.zeros(query_len)
+    with open(transform_path, 'r') as file:
+        for i in range(query_len):
+            line = file.readline().strip()  # Read the first line and remove leading/trailing whitespace
+            numbers = line.split(",")  # Split the line by comma
+            localized_frames[i] = numbers[3]
+            for j in range(incre_que-1):
+                file.readline()
+    localized_frames= localized_frames/incre_ref
+    localized_frames = np.round(localized_frames).astype(int)
+    np.savetxt("/home/lamlam/code/visual_place_recognition/clustering/localized_frames.txt",localized_frames)
+    return localized_frames

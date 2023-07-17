@@ -21,6 +21,7 @@ from scipy.stats import entropy
 import sys
 sys.path.append("/home/lamlam/code/visual_place_recognition")
 import evaluation_tool
+from tqdm import tqdm
 
 if __name__ == '__main__':
     #Load parameters:
@@ -68,15 +69,18 @@ if __name__ == '__main__':
     #Get histogram from reference run
     reference_run = config['reference_run']
     query_run = config['query_run']
-    reference_path, ref_length, incre_ref = path_processing.path_process_ref_que(reference_run, config)
-    query_path, query_length, incre_query = path_processing.path_process_ref_que(query_run, config)
+    reference_path, ref_length, incre_ref = path_processing.path_process_ref_que_accurate(reference_run, config)
+    query_path, query_length, incre_query = path_processing.path_process_ref_que_accurate(query_run, config)
+
     max_similarity_run_index = np.zeros(query_length,dtype=int)
     ref_count = []
     similarity_run = np.zeros((ref_length,query_length),dtype=float)
 
     print("Start doing inference on reference images")
+    #print(reference_path)
+    #print(query_path)
     #Must be done in order -> otherwise the appending will be messed up. Can initialize the ref_count first if don't want to do in order
-    for i in range (len(reference_path)):
+    for i in tqdm(range(len(reference_path))):
         #List of tensors
         descriptors = learned_feature_detector.run_window_normalize(path_processing.pre_process_image(reference_path[i]),config["score_threshold_to_be_chosen"])
         descriptors = torch.tensor(descriptors)  #size {768,992}
@@ -90,7 +94,9 @@ if __name__ == '__main__':
         ref_count.append(count)
 
     print("Start doing inference on query run")
-    for frame_index,frame_path in enumerate(query_path):
+    #Only necessary to do visual ambiguity matrix method
+    histogram_matrix_B = []  #List of numpy arrays
+    for frame_index,frame_path in tqdm(enumerate(query_path)):
         #List of tensors
         descriptors = learned_feature_detector.run_window_normalize(path_processing.pre_process_image(frame_path),config["score_threshold_to_be_chosen"])
         descriptors = torch.tensor(descriptors)  #size {664,992}
@@ -101,6 +107,8 @@ if __name__ == '__main__':
             similarities = 1.0 - cdist(value[None, :], list_descriptors, metric="cosine")
             label = np.argmax(similarities)
             count[label] +=1
+
+        histogram_matrix_B.append(count)
 
         #Compare histograms of reference and query runs
         #Cannot do vectorized operation because wassterstein_distance doesn't support that
@@ -117,17 +125,49 @@ if __name__ == '__main__':
                 distance = entropy((count+epsilon)/np.sum(count),(value+epsilon)/np.sum(count))
             
             similarity_run[index,frame_index] = distance
-            if(distance < min_distance):
-                min_distance = distance
-                min_index = index
-        max_similarity_run_index[frame_index] = min_index
-        
+
+    #Use compression to hopefully filter out noise
+    if(config["compressed"] == "svd"):
+        num_removed = config["num_singular_values_removed"]
+        U, S, VT = np.linalg.svd(similarity_run, full_matrices=False)  #Already sorted in descending order
+        similarity_run = U[:, :-num_removed] @ np.diag(S[:-num_removed]) @ VT[:-num_removed, :]
+        #Assume the eigenvalues are positive and real -> might need to plot magnitude instead
+        evaluation_tool.plot_singular_values(S)
+    max_similarity_run_index = np.argmin(similarity_run,axis=0)
+
+    #Need similarity matrix for A vs A and B vs B
+    similarity_A = np.zeros((ref_length,ref_length),dtype=float)
+    for idx1,value1 in enumerate(ref_count):
+        for idx2,value2 in enumerate(ref_count):
+            if(config["histogram_comparison_method"] == "EMD"):
+                distance = wasserstein_distance(value1/np.sum(value1),value2/np.sum(value2))
+            else:
+                epsilon = 1e-8  # Small epsilon value
+                distance = entropy((value1+epsilon)/np.sum(value1),(value2+epsilon)/np.sum(value2))
+            similarity_A[idx1,idx2] = distance
+
+    similarity_B = np.zeros((query_length,query_length),dtype=float)
+    for idx1,value1 in enumerate(histogram_matrix_B):
+        for idx2,value2 in enumerate(histogram_matrix_B):
+            if(config["histogram_comparison_method"] == "EMD"):
+                distance = wasserstein_distance(value1/np.sum(value1),value2/np.sum(value2))
+            else:
+                epsilon = 1e-8  # Small epsilon value
+                distance = entropy((value1+epsilon)/np.sum(value1),(value2+epsilon)/np.sum(value2))
+            similarity_B[idx1,idx2] = distance
+    
+    np.savetxt("/home/lamlam/code/visual_place_recognition/clustering/A.txt",similarity_A)
+    np.savetxt("/home/lamlam/code/visual_place_recognition/clustering/B.txt",similarity_B)
+    np.savetxt("/home/lamlam/code/visual_place_recognition/clustering/similarity_matrix.txt",similarity_run)
+
     print("Start evaluation")
     gps_distance, ref_gps, query_gps = evaluation_tool.gps_ground_truth(reference_run,query_run,ref_length,query_length, incre_ref, incre_query)
+    print(ref_gps[270])
+    print(query_gps[310])
     evaluation_tool.plot_similarity_clustering(similarity_run, reference_run, query_run,config["histogram_comparison_method"])
     
     threshold_list = config["success_threshold_in_m"]
-    success_rate, average_error = evaluation_tool.calculate_success_rate_list(max_similarity_run_index,ref_gps,query_gps,threshold_list)
+    success_rate, average_error = evaluation_tool.calculate_success_rate_list(max_similarity_run_index,ref_gps,query_gps,threshold_list, reference_run, query_run, incre_ref,incre_query)
     for idx,rate in enumerate(success_rate):
         print("Success rate at threshold " + str(config["success_threshold_in_m"][idx]) + "m is " + str(rate))
     

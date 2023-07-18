@@ -77,8 +77,6 @@ if __name__ == '__main__':
     similarity_run = np.zeros((ref_length,query_length),dtype=float)
 
     print("Start doing inference on reference images")
-    #print(reference_path)
-    #print(query_path)
     #Must be done in order -> otherwise the appending will be messed up. Can initialize the ref_count first if don't want to do in order
     for i in tqdm(range(len(reference_path))):
         #List of tensors
@@ -135,6 +133,7 @@ if __name__ == '__main__':
         evaluation_tool.plot_singular_values(S)
     max_similarity_run_index = np.argmin(similarity_run,axis=0)
 
+    """
     #Need similarity matrix for A vs A and B vs B
     similarity_A = np.zeros((ref_length,ref_length),dtype=float)
     for idx1,value1 in enumerate(ref_count):
@@ -160,7 +159,7 @@ if __name__ == '__main__':
     np.savetxt("/home/lamlam/code/visual_place_recognition/clustering/B.txt",similarity_B)
     np.savetxt("/home/lamlam/code/visual_place_recognition/clustering/similarity_matrix_test.txt",similarity_run)
     np.savetxt("/home/lamlam/code/visual_place_recognition/clustering/chosen_frames.txt",max_similarity_run_index)
-
+    """
     print("Start evaluation")
     gps_distance, ref_gps, query_gps = evaluation_tool.gps_ground_truth(reference_run,query_run,ref_length,query_length, incre_ref, incre_query)
     evaluation_tool.plot_similarity_clustering(similarity_run, reference_run, query_run,config["histogram_comparison_method"])
@@ -174,5 +173,14 @@ if __name__ == '__main__':
     print("Finish evaluation")
 
     #Write to a file
+    file_path = "results/" + str(reference_run) + "_" + str(query_run) + ".txt"
+    file = open(file_path,"w+")
+    for key, value in config.items():
+        file.write(f"{key}: {value}\n")
+    for idx,rate in enumerate(success_rate):
+        file.write("Success rate at threshold " + str(config["success_threshold_in_m"][idx]) + "m is " + str(rate) + "\n")
+    file.write("Average error in meters: " + str(average_error))
+    file.close()
+
 
 

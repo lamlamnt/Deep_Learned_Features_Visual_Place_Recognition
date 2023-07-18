@@ -72,8 +72,8 @@ def gps_ground_truth(reference_run, query_run, reference_len, query_len, increme
     plt.savefig("plots/" + plot_name)
     """
     #Get the max distance difference:
-    np.savetxt("/home/lamlam/code/visual_place_recognition/clustering/query_gps.txt",query_gps)
-    np.savetxt("/home/lamlam/code/visual_place_recognition/clustering/ref_gps.txt",ref_gps)
+    #np.savetxt("/home/lamlam/code/visual_place_recognition/clustering/query_gps.txt",query_gps)
+    #np.savetxt("/home/lamlam/code/visual_place_recognition/clustering/ref_gps.txt",ref_gps)
     return gps_distance, ref_gps, query_gps
 
 def plot_similarity(similarity_run, reference_run, query_run, sampling_method):
@@ -121,10 +121,11 @@ def calculate_success_rate_list(max_similarity_idx, ref_gps, query_gps, threshol
                 success[index,threshold_idx] = 1
         sum += distance
     #Returns the success rate and the average distance error
-    plot_distance(distance_frame,reference_run, query_run)
-    #Localized frame to run 0 
-    localized_frame = get_localized_frame(query_run,len(query_gps),incre_ref,incre_que)
-    plot_chosen_frame(max_similarity_idx,localized_frame,reference_run,query_run)
+    if(query_run != 0):
+        plot_distance(distance_frame,reference_run, query_run)
+        #Localized frame to run 0 
+        localized_frame = get_localized_frame(query_run,len(query_gps),incre_ref,incre_que)
+        plot_chosen_frame(max_similarity_idx,localized_frame,reference_run,query_run)
     return np.sum(success,axis=0)/len(max_similarity_idx),float(sum/len(max_similarity_idx))
 
 def plot_scores(scores):

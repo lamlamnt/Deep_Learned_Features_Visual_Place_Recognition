@@ -1,0 +1,29 @@
+network_path: /home/lamlam/data/networks/network_inthedark_layer32.pth
+validation_run: 1
+validation_run_dark: 17
+sample_rate_num_frames: 25
+layer_size: 32
+clustering_method: kmeans
+score_threshold_to_be_chosen: 0.4
+dbscan_eps: 0.5
+dbscan_min_samples: 10
+threshold_to_eliminate_clusters: 3000
+kmeans_num_clusters: 150
+histogram_comparison_method: cross_entropy
+number_eigenvalues_removed: 23
+gps_paths: [0, 1, 2, 5, 6, 9, 10, 11, 12, 13, 14, 15, 16, 17, 18, 19, 25, 26, 27, 28, 29, 30, 31]
+paths_not_used_for_training: [2, 11, 16, 17, 23, 28, 35]
+test_paths: [2, 11, 16, 17, 28]
+inaccurate_gps: [9, 14, 15, 16, 17, 18, 19, 27]
+reference_run: 0
+query_run: 2
+path_length: 260
+downsampled: yes
+number_meter_per_frame: 0.5
+success_threshold_in_m: [5, 10]
+compressed_options: ['no', 'svd', 'spectral_decomposition']
+compressed: no
+num_singular_values_removed: 450
+Success rate at threshold 5m is 0.9871323529411765
+Success rate at threshold 10m is 0.9981617647058824
+Average error in meters: 1.8547639881950952

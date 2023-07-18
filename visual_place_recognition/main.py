@@ -11,8 +11,11 @@ from unet_extraction import LearnedFeatureDetector
 import evaluation_tool
 import argparse
 import json
+import sys
+sys.path.append("/home/lamlam/code/visual_place_recognition/clustering")
+import path_processing
 
-def path_processing(run, query_bool):
+def path_processing_name(run, config):
     name = ""
     if(run < 10):
         name = "0" + str(run)
@@ -72,8 +75,8 @@ if __name__ == '__main__':
                                                       checkpoint_path=network_path,
                                                       cuda=cuda)
     #Reference path is a list 
-    reference_path, ref_length, incre_ref = path_processing(reference_run, query_bool = False)
-    query_path, query_length, incre_query = path_processing(query_run, query_bool = True)
+    reference_path, ref_length, incre_ref = path_processing.path_process_ref_que_accurate(reference_run, config)
+    query_path, query_length, incre_query = path_processing.path_process_ref_que_accurate(query_run, config)
     transform = transforms.Compose([transforms.ToTensor()])
     reference_descriptors = []
     max_similarity_run = np.zeros(query_length,dtype=float)
@@ -81,15 +84,8 @@ if __name__ == '__main__':
     similarity_run = np.zeros((ref_length,query_length),dtype=float)
 
     #Extract keypoints, scores, and descriptors (max pooling) from the reference run and query run
-    #Not done in order
     print("Start doing inference on reference images")
 
-    """
-    for frame_path in reference_path:
-        descriptors = learned_feature_detector.run5(pre_process_image(frame_path))
-        reference_descriptors.append(descriptors)
-    """
-    #This ensures it's in order, thought might be a bit slower
     for i in range(len(reference_path)):
         descriptors = learned_feature_detector.run5(pre_process_image(reference_path[i]))
         reference_descriptors.append(descriptors)
@@ -127,7 +123,7 @@ if __name__ == '__main__':
     print("Finish evaluation")
 
     #Write to a file for record keeping
-    file_path = "results/" + config["experiment_name"] + ".txt"
+    file_path = "/home/lamlam/code/visual_place_recognition/results/" + str(reference_run) + "_" + str(query_run) + ".txt"
     file = open(file_path,"w+")
     for key, value in config.items():
         file.write(f"{key}: {value}\n")

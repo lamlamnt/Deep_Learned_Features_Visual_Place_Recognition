@@ -1,9 +1,9 @@
 {
-  "home_path": "/home/lamlam/data",
+  "home_path": "/home/lamlam/data/robotcar_seasons_v1",
 
-  "experiment_name": "train_model_inthedark",
-  "dataset_name": "inthedark",
-  "checkpoint_name": "network_inthedark",
+  "experiment_name": "train_model_robotcar_seasons_2",
+  "dataset_name": "robotcar_seasons_v1",
+  "checkpoint_name": "network_multiseason_inthedark_layer16.pth_57",
 
   "training": {
     "start_pose_estimation": 4,
@@ -20,7 +20,7 @@
   "pipeline": {
     "window_h": 16,
     "window_w": 16,
-    "dense_matching": true
+    "dense_matching": false
   },
 
   "outlier_rejection": {
@@ -33,21 +33,21 @@
   },
 
   "data_loader": {
-    "batch_size": 3,
-    "num_workers": 3,
+    "batch_size": 1,
+    "num_workers": 1,
     "shuffle": false
   },
 
   "stereo": {
-    "cu": 253.502,
-    "cv": 196.822,
-    "f": 388.425,
-    "b": 0.239946
+    "cu": 643.646973,
+    "cv": 493.378998,
+    "f": 983.044006,
+    "b": 0.24
   },
 
   "dataset": {
-    "height": 384,
-    "width": 512,
+    "height": 960,
+    "width": 1280,
     "use_normalization": false,
     "use_disparity": true
   },

@@ -125,7 +125,6 @@ class Pipeline(nn.Module):
                                                                                          descriptors_trg,
                                                                                          disparities[:, 0, :, :],
                                                                                          self.stereo_cam)
-
         ################################################################################################################
         # Match keypoints from the source and target frames
         ################################################################################################################
@@ -154,7 +153,6 @@ class Pipeline(nn.Module):
 
         # Compute the weight associated with each matched point pair. They will be used when computing the pose.
         weights = self.weight_block(kpt_desc_norm_src, kpt_desc_norm_pseudo, kpt_scores_src, kpt_scores_pseudo)
-
 
         ################################################################################################################
         # Outlier rejection
@@ -224,7 +222,6 @@ class Pipeline(nn.Module):
                                                self.config['outlier_rejection']['dim'][0])
 
             valid_inliers = ransac_inliers.unsqueeze(1)
-
 
         ################################################################################################################
         # Compute the pose

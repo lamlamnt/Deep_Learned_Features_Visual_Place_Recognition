@@ -14,7 +14,7 @@ def build_sub_graph(runs, data_dir):
         and Mapping Dataset that can be found at http://asrl.utias.utoronto.ca/datasets/2020-vtr-dataset/index.html.
 
         Args:
-            runs (list[int]): the ids of the runs from the dataset that we want to include in the pose graph.
+            runs (list[string]): the ids of the runs from the dataset that we want to include in the pose graph.
             data_dir (string): the top-level directory that holds the data for the path for which we build a pose graph.
 
         Returns:

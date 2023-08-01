@@ -190,7 +190,6 @@ def train(pipeline, net, optimizer, scheduler, train_loader, validation_loader, 
 
     # The training loop.
     for epoch in range(start_epoch, config['training']['max_epochs']):
-
         train_loss, train_stats = execute_epoch(pipeline,
                                                 net,
                                                 train_loader,
@@ -240,8 +239,7 @@ def main(config):
     """
     results_path = f"{config['home_path']}/results/{config['experiment_name']}/"
     checkpoints_path = f"{config['home_path']}/networks"
-    #data_path = f"{config['home_path']}/data"
-    data_path = "/Volumes/oridatastore09/ThirdPartyData/utias"
+    data_path = "/Volumes/scratchdata/lamlam/processed_data"
     datasets_path = f"{config['home_path']}/datasets"
 
     checkpoint_name = config['checkpoint_name']
@@ -278,17 +276,17 @@ def main(config):
 
     # Training data generator (randomly sample a subset of the full dataset for each epoch).
     train_set = Dataset(**dataset_params)
-    train_sampler = RandomSampler(train_set, replacement=True, num_samples=10000)
+    train_sampler = RandomSampler(train_set, replacement=True, num_samples=200)
     train_set.load_mel_data(localization_data, 'training')
     train_loader = data.DataLoader(train_set, sampler=train_sampler, **dataloader_params)
 
     # Validation data generator (randomly sample a subset of the full dataset for each epoch).
     validation_set = Dataset(**dataset_params)
-    validation_sampler = RandomSampler(validation_set, replacement=True, num_samples=2500)
+    validation_sampler = RandomSampler(validation_set, replacement=True, num_samples=50)
     validation_set.load_mel_data(localization_data, 'validation')
     validation_loader = data.DataLoader(validation_set, sampler=validation_sampler, **dataloader_params)
 
-    # Set up device, using GPU 0
+    # Set up device, using GPU 1
     device = torch.device('cuda:{}'.format(0) if torch.cuda.device_count() > 0 else 'cpu')
     torch.cuda.set_device(0)
 

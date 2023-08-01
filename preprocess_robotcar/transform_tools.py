@@ -1,18 +1,5 @@
 import numpy as np
 
-def gh_to_stereo(se3):
-    #Might want inverse of this
-    rear_extrinsic_seasons = np.array([[-0.999802, -0.011530, -0.016233, 0.060209],
-                                   [-0.015184, 0.968893, 0.247013, 0.153691],
-                                    [0.012880, 0.247210, -0.968876, -2.086142],
-                                    [0.000000, 0.000000, 0.000000, 1.000000]])
-    return se3@rear_extrinsic_seasons
-
-#frame 2 is the reference frame
-#Maybe switch position of in the matrix multiplication
-def get_relative(frame1,frame2):
-    return np.dot(frame2, np.linalg.inv(frame1))
-
 def extract_translation(se3_matrix):
     # Extract the translational part (last column) from the SE(3) matrix
     translation = se3_matrix[:3, 3]

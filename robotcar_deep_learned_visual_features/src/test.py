@@ -207,8 +207,7 @@ def main(config):
     """
     results_path = f"{config['home_path']}/results/{config['experiment_name']}/"
     checkpoints_path = f"{config['home_path']}/networks"
-    #data_path = f"{config['home_path']}/data"
-    data_path = "/Volumes/oridatastore09/ThirdPartyData/utias/"
+    data_path = "/Volumes/scratchdata/lamlam/processed_data"
     datasets_path = f"{config['home_path']}/datasets"
 
     checkpoint_name = config['checkpoint_name']
@@ -265,7 +264,7 @@ def main(config):
 
     # Set up device, using GPU 0.
     device = torch.device('cuda:{}'.format(0) if torch.cuda.device_count() > 0 else 'cpu')
-    torch.cuda.set_device(0)
+    torch.cuda.set_device(1)
 
     torch.multiprocessing.set_sharing_strategy('file_system')
 

@@ -43,11 +43,10 @@ def pose_from_oxts_packet(lat, lon, alt, roll, pitch, yaw):
 
     er = 6378137.  # earth radius (approx.) in meters
     # Use a Mercator projection to get the translation vector
-    ty = lat * np.pi * er / 180.
+    #ty = lat * np.pi * er / 180.
 
     tx = scale * lon * np.pi * er / 180.
-    # ty = scale * er * \
-    #     np.log(np.tan((90. + lat) * np.pi / 360.))
+    ty = scale * er * np.log(np.tan((90. + lat) * np.pi / 360.))
     tz = alt
     t = np.array([tx, ty, tz]).reshape(-1,1)
 
@@ -128,9 +127,9 @@ seasons_se3_sdk_2 = convert_gh_to_stereo(se3_gh_2,inv_se3_calculated_extrinsic)
 gps_se3_1_converted = convert_gh_to_stereo(gps_se3_1,inv_se3_ins_extrinsic)
 gps_se3_2_converted = convert_gh_to_stereo(gps_se3_2,inv_se3_ins_extrinsic)
 
-print(seasons_se3_1)
+#print(seasons_se3_1)
 #For some reasons this gives much larger translation distance
-#print(get_relative(gps_se3_1_converted,gps_se3_2_converted))
+print(get_relative(gps_se3_1_converted,gps_se3_2_converted))
 #print(seasons_se3_1_inv)
 #print(seasons_se3_1)
 #print(get_relative(seasons_se3_1_inv,seasons_se3_2_inv))

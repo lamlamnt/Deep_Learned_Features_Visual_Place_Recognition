@@ -89,6 +89,8 @@ def test_model(pipeline, net, data_loader, dof):
             try:
                 # Compute the output poses (we use -1 a placeholder as epoch is not relevant).
                 output_se3 = pipeline.forward(net, images, disparities, pose_se3, pose_log, epoch=-1, test=True)
+                print(output_se3)
+                print(pose_se3)
 
             except Exception as e:
                 print(e)
@@ -264,7 +266,7 @@ def main(config):
 
     # Set up device, using GPU 0.
     device = torch.device('cuda:{}'.format(0) if torch.cuda.device_count() > 0 else 'cpu')
-    torch.cuda.set_device(1)
+    torch.cuda.set_device(0)
 
     torch.multiprocessing.set_sharing_strategy('file_system')
 

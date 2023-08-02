@@ -39,9 +39,9 @@ class Pipeline(nn.Module):
         self.width = config['dataset']['width']
 
         # Transform from sensor to vehicle.
-        T_s_v = torch.tensor([[0.000796327, -1.0, 0.0, 0.119873],
-                              [-0.330472, -0.000263164, -0.943816, 1.49473],
-                              [0.943815, 0.000751586, -0.330472, 0.354804],
+        T_s_v = torch.tensor([[1.0, 0.0, 0.0, 0.0],
+                              [0.0, 1.0, 0.0, 0.0],
+                              [0.0, 0.0, 1.0, 1.52],
                               [0.0, 0.0, 0.0, 1.0]])
         self.register_buffer('T_s_v', T_s_v)
 

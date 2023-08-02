@@ -1,9 +1,9 @@
 {
   "home_path": "/home/lamlam/data/robotcar_seasons_v1",
 
-  "experiment_name": "test_model_seasons_1",
+  "experiment_name": "test_model_seasons_2",
   "dataset_name": "robotcar_seasons_v1",
-  "checkpoint_name": "network_multiseason_inthedark_layer16.pth_57",
+  "checkpoint_name": "network_multiseason_inthedark_layer16.pth_57_114",
 
   "network": {
     "num_channels": 3,
@@ -14,7 +14,7 @@
   "pipeline": {
     "window_h": 16,
     "window_w": 16,
-    "dense_matching": true
+    "dense_matching": false
   },
 
   "outlier_rejection": {

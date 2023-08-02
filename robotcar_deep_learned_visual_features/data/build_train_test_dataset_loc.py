@@ -45,7 +45,7 @@ def main(config):
     #print(torch.cuda.is_available())
     # Set up device, using GPU 0
     device = torch.device('cuda:{}'.format(0) if torch.cuda.device_count() > 0 else 'cpu')
-    torch.cuda.set_device(1)
+    torch.cuda.set_device(0)
 
     start = time.time()
 
@@ -97,7 +97,7 @@ def main(config):
     # Generate sequential datasets that can be used for testing.
     mel_data.paths = config['test_paths']
     for path_name in config['test_paths']:
-
+        print("one test run")
         test_runs = config['test_runs'][path_name]
 
         # We localize different runs of a path against each other and so store the resulting data in lists.

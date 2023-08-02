@@ -1,9 +1,9 @@
 {
   "home_path": "/home/lamlam/data/robotcar_seasons_v1",
 
-  "experiment_name": "train_model_robotcar_seasons_2",
+  "experiment_name": "train_model_robotcar_seasons_3",
   "dataset_name": "robotcar_seasons_v1",
-  "checkpoint_name": "network_multiseason_inthedark_layer16.pth_57",
+  "checkpoint_name": "network_robotcar_seasons",
 
   "training": {
     "start_pose_estimation": 4,

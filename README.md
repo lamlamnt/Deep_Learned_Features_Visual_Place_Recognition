@@ -38,5 +38,12 @@
 <br> cpp_binding/exportnetwork_to_pt.py exports .pth to .pt file and cpp_binding/test.cpp uses Torch Jit to load the .pt file and performs inference
 <br>
 <br> 4. Bag of Binary Words
+<br>
+<br> 5. Visual place recognition on UTIAS inthedark data
+<br>
+<br> 6. Pre-process robotcar seasons data
+<br>
+<br> 7. Visual place recognition on Robotcar Seasons data 
+<br>
 
 

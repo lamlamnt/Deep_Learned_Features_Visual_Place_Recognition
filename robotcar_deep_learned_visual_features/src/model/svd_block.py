@@ -69,7 +69,7 @@ class SVDBlock(nn.Module):
         T_trg_src = torch.cat([rot_cols, trans_cols], dim=2)  # Bx4x4
 
         # Convert from sensor to vehicle frame
-        #T_s_v = self.T_s_v.expand(batch_size, 4, 4)
-        #T_trg_src = se3_inv(T_s_v).bmm(T_trg_src).bmm(T_s_v)
+        T_s_v = self.T_s_v.expand(batch_size, 4, 4)
+        T_trg_src = se3_inv(T_s_v).bmm(T_trg_src).bmm(T_s_v)
 
         return T_trg_src

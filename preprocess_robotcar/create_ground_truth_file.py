@@ -1,6 +1,9 @@
 import os 
 import transform_tools
 import numpy as np
+import sys
+sys.path.append("/home/lamlam/downloads/robotcar-dataset-sdk/python")
+import transform
 
 #Iterate through each se3_grasshopper.txt and create a .txt file that contains the se3 in stereo
 def convert_gh_to_stereo(runs):
@@ -56,12 +59,14 @@ def create_relative_file(reference_run, query_runs):
                                 index_of_closest = transform_tools.find_closest_se3_index(se3_query_matrix,list_se3_ref)
                                 #Calculate the relative se3 transformation. Np array
                                 relative_se3 = np.linalg.inv(list_se3_ref[index_of_closest])@se3_query_matrix
+                                #Convert from bumblee frame to vehicle frame - due to no rotation part - this commented out line doesn't do anything
+                                #relative_se3 = np.linalg.inv(T_s_v)@(relative_se3@T_s_v)
                                 #Write relative se3 to file and format properly for training
                                 str_list = [str(element) for element in relative_se3.flatten().tolist()]
                                 content = ",".join(str_list)
-                                #Want time stamp of reference frame, and not just index 
-                                relative_file.write(str(value) + "," + se3_query_timestamp + "," + str(reference_run) + "," + list_timestamps_ref[index_of_closest] + "," + content + "\n")
-                                
+                                #Want time stamp of reference frame, and not just index
+                                if(float(str_list[11]) < threshold_eliminate): 
+                                        relative_file.write(str(value) + "," + se3_query_timestamp + "," + str(reference_run) + "," + list_timestamps_ref[index_of_closest] + "," + content + "\n")
 
 def create_transform_temporal(reference_run):
         reference_file_path = os.path.join(root_dir,"run_" + str(reference_run).zfill(6), stereo_file_name)
@@ -82,10 +87,13 @@ def create_transform_temporal(reference_run):
                 for i in range(len(list_se3_ref)-1):
                         #i is the previous index
                         relative_se3 = np.linalg.inv(list_se3_ref[i+1])@list_se3_ref[i]
+                        #Convert from bumblee frame to vehicle frame - due to no rotation part - this commented out line doesn't do anything
+                        #relative_se3 = np.linalg.inv(T_s_v)@(relative_se3@T_s_v)
                         str_list = [str(element) for element in relative_se3.flatten().tolist()]
                         content = ",".join(str_list)
                         #Want time stamp of reference frame, and not just index 
-                        output_file.write(str(reference_run) + "," + list_timestamps_ref[i] + "," + str(reference_run) + "," + list_timestamps_ref[i+1] + "," + content + "\n")
+                        if(float(str_list[11]) < threshold_eliminate): 
+                                output_file.write(str(reference_run) + "," + list_timestamps_ref[i] + "," + str(reference_run) + "," + list_timestamps_ref[i+1] + "," + content + "\n")
 
 if __name__ == '__main__':
         #Set parameters
@@ -93,10 +101,22 @@ if __name__ == '__main__':
         runs = [0,1,2,3,4,5,6,7,8]
         gh_file_name = "se3_grasshopper_2.txt"
         stereo_file_name = "se3_stereo.txt"
+        threshold_eliminate = 5.0
+
+        #Using the data from sdk instead of from seasons
+        xyzrpy = np.array([-2.0582, 0.0894, 0.3675, -0.0119, -0.2498, 3.1283])
+        rear_extrinsic_seasons = np.asarray(transform.build_se3_transform(xyzrpy))
+        """
         rear_extrinsic_seasons = np.array([[-0.999802, -0.011530, -0.016233, 0.060209],
                                    [-0.015184, 0.968893, 0.247013, 0.153691],
                                     [0.012880, 0.247210, -0.968876, -2.086142],
                                     [0.000000, 0.000000, 0.000000, 1.000000]])
+        """
+        #Transformation matrix that transforms a point from vehicle frame to sensor frame
+        T_s_v = np.array([[1,0,0,0],
+                          [0,1,0,0],
+                          [0,0,1,1.52],
+                          [0,0,0,1]])
 
         convert_gh_to_stereo(runs)
 

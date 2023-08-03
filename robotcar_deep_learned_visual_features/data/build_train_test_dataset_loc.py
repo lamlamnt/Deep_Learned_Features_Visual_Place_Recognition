@@ -6,6 +6,7 @@ import pickle
 import random
 import sys
 import time
+import resource
 
 import numpy as np
 import torch
@@ -134,6 +135,8 @@ def main(config):
     fe.close()
 
 if __name__ == '__main__':
+    #in MB -> This line seems to do nothing?
+    resource.setrlimit(resource.RLIMIT_STACK, (10000 * 1024 * 1024, resource.RLIM_INFINITY))
     parser = argparse.ArgumentParser()
     parser.add_argument('--config', default=None, type=str,
                       help='config file path (default: None)')

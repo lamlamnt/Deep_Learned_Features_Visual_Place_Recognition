@@ -129,6 +129,7 @@ def parse_gps():
     pass
 
 
+if __name__ == '__main__':
 
 
 

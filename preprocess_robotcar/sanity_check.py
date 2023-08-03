@@ -57,7 +57,7 @@ np.set_printoptions(suppress=True)
 #print(np.linalg.inv(rear_extrinsic_different)@(np.linalg.inv(gh_0_2)@(gh_5_2@rear_extrinsic_different)))
 
 #New answer - but not using the inverse
-#print(np.linalg.inv(rear_extrinsic_not_inv)@(np.linalg.inv(gh_0_2)@(gh_5_2@rear_extrinsic_not_inv)))
+print(np.linalg.inv(rear_extrinsic_not_inv)@(np.linalg.inv(gh_0_2)@(gh_5_2@rear_extrinsic_not_inv)))
 
 #This is P_G1 and P_G2
 dummy_1 = np.array([[1,0,0,1],
@@ -73,18 +73,18 @@ rear_extrinsic_final = transform.build_se3_transform(xyzrpy)
 print(rear_extrinsic_final)
 #This is B2_B1
 T_b = np.linalg.inv(rear_extrinsic_final)@(np.linalg.inv(dummy_2)@(dummy_1@rear_extrinsic_final))
-print(T_b)
+#print(T_b)
 
 #Point in B1 frame
 dummy_b1 = np.array([[1],[1],[1],[1]])
-print(T_b@dummy_b1)
+#print(T_b@dummy_b1)
 
 rear_extrinsic_final = np.linalg.inv(rear_extrinsic)
 T_b_2 = np.linalg.inv(rear_extrinsic_final)@(np.linalg.inv(dummy_2)@(dummy_1@rear_extrinsic_final))
-print(T_b_2@dummy_b1)
+#print(T_b_2@dummy_b1)
 
 T_b_old = np.linalg.inv(rear_extrinsic)@(np.linalg.inv(dummy_2)@(dummy_1@rear_extrinsic))
-print(T_b_old@dummy_b1)
+#print(T_b_old@dummy_b1)
 
 
 #Compare matrices
@@ -97,14 +97,14 @@ new = np.array([[0.9872967238066024,0.0378735013049417,-0.154308662570292,14.491
                 [-0.03729361606403029,0.9992825486826376,0.006652412990329454,16.277580503010178],
                 [0.1544491375301982,-0.0008130636838704317,0.9880008413579754,92.11911496314501],
                 [0.0,0.0,0.0,1.0]])
-print(old@dummy_b1)
-print(new@dummy_b1)
+#print(old@dummy_b1)
+#print(new@dummy_b1)
 
 T_s_v = np.array([[0.5,0.3,0,0],
                           [0,0.9,0,0],
                           [0,0.2,0.6,1.52],
                           [0,0,0,1]])
-print(np.linalg.inv(T_s_v)@(dummy_1@T_s_v))
+#print(np.linalg.inv(T_s_v)@(dummy_1@T_s_v))
 
 
 

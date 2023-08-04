@@ -65,7 +65,7 @@ def create_relative_file(reference_run, query_runs):
                                 str_list = [str(element) for element in relative_se3.flatten().tolist()]
                                 content = ",".join(str_list)
                                 #Want time stamp of reference frame, and not just index
-                                if(float(str_list[11]) < threshold_eliminate): 
+                                if(abs(float(str_list[11])) < threshold_translate and float(str_list[0]) > threshold_rotate): 
                                         relative_file.write(str(value) + "," + se3_query_timestamp + "," + str(reference_run) + "," + list_timestamps_ref[index_of_closest] + "," + content + "\n")
 
 def create_transform_temporal(reference_run):
@@ -92,7 +92,7 @@ def create_transform_temporal(reference_run):
                         str_list = [str(element) for element in relative_se3.flatten().tolist()]
                         content = ",".join(str_list)
                         #Want time stamp of reference frame, and not just index 
-                        if(float(str_list[11]) < threshold_eliminate): 
+                        if(abs(float(str_list[11])) < threshold_translate): 
                                 output_file.write(str(reference_run) + "," + list_timestamps_ref[i] + "," + str(reference_run) + "," + list_timestamps_ref[i+1] + "," + content + "\n")
 
 if __name__ == '__main__':
@@ -101,7 +101,8 @@ if __name__ == '__main__':
         runs = [0,1,2,3,4,5,6,7,8]
         gh_file_name = "se3_grasshopper_2.txt"
         stereo_file_name = "se3_stereo.txt"
-        threshold_eliminate = 5.0
+        threshold_translate = 2.0
+        threshold_rotate = -0.8
 
         #Using the data from sdk instead of from seasons
         xyzrpy = np.array([-2.0582, 0.0894, 0.3675, -0.0119, -0.2498, 3.1283])

@@ -1,14 +1,14 @@
 {
   "home_path": "/home/lamlam/data/robotcar_seasons_v1",
 
-  "dataset_name": "robotcar_seasons_v3",
-  "num_train_samples": 3000,
-  "num_validation_samples": 2000,
+  "dataset_name": "robotcar_seasons_v5",
+  "num_train_samples": 2000,
+  "num_validation_samples": 1000,
   "max_temporal_len": 3,
 
   "dataset":{
-      "height": 960,
-      "width": 1280
+      "height": 384,
+      "width": 512
   },
 
   "train_paths": ["robotcar_seasons"],

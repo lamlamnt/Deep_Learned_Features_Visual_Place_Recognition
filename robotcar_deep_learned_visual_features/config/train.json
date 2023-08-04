@@ -1,9 +1,9 @@
 {
   "home_path": "/home/lamlam/data/robotcar_seasons_v1",
 
-  "experiment_name": "train_model_robotcar_seasons_5",
-  "dataset_name": "robotcar_seasons_v3",
-  "checkpoint_name": "utias_pre_trained_layer_16",
+  "experiment_name": "train_model_robotcar_seasons_11",
+  "dataset_name": "robotcar_seasons_v5",
+  "checkpoint_name": "increase_num_samples",
 
   "training": {
     "start_pose_estimation": 4,
@@ -20,7 +20,7 @@
   "pipeline": {
     "window_h": 16,
     "window_w": 16,
-    "dense_matching": false
+    "dense_matching": true
   },
 
   "outlier_rejection": {
@@ -46,8 +46,8 @@
   },
 
   "dataset": {
-    "height": 960,
-    "width": 1280,
+    "height": 384,
+    "width": 512,
     "use_normalization": false,
     "use_disparity": true
   },

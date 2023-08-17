@@ -1,4 +1,4 @@
-<br> 1. Deep Learned Features:
+<br> #1. Deep Learned Features:
 <br> Code: https://github.com/utiasASRL/deep_learned_visual_features <span>
 <br> Dataset (multiseason and inthedark): http://asrl.utias.utoronto.ca/datasets/2020-vtr-dataset/
 <br> These 2 datasets are currently in /Volumes/oridatastore09/ThirdPartyData/utias
@@ -20,7 +20,7 @@ Ground truth for training is relative poses (in the form of 4x4 se3 transformati
 <br> 
 <br> Conclusion: 
 <br>
-<br> 2. Inference using TensorRT on GPU 
+<br> #2. Inference using TensorRT on GPU 
 <br> Installation requirements: need CUDA Toolkit (fafnir already has it), cuDNN, and CUDA-supported version of opencv 
 <br> 
 <br> Installing CUDA-supported version of opencv (normal installation methods will probably install the non-cuda-supported version): 

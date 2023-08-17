@@ -1,0 +1,16 @@
+reference_run: 0
+query_run: 1
+network_path: /home/lamlam/data/robotcar_seasons_v1/networks/3_change_weighting_70.pth
+image_folder_path: /Volumes/oridatastore09/ThirdPartyData/utias/inthedark/run_0000
+layer_size: 16
+descriptor_difference_method: cosine
+sampling_method: downsampled
+first_num_frames: 500
+path_length: 260
+number_meter_per_frame: 0.5
+success_threshold_in_m: [5, 10, 25]
+downsampled: no
+Success rate at threshold 5m is 0.9722222222222222
+Success rate at threshold 10m is 0.9823232323232324
+Success rate at threshold 25m is 0.9941077441077442
+Average error in meters: 2.4829707287318503

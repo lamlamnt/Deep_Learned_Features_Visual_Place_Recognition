@@ -215,7 +215,7 @@ class Dataset(data.Dataset):
         img_file_left = f"{self.data_dir}/{path_name}/run_{run_id.zfill(6)}/images/" \
                         f"left/{pose_id.zfill(6)}.png"
         img_file_right = f"{self.data_dir}/{path_name}/run_{run_id.zfill(6)}/images/" \
-                        f"right/{pose_id.zfill(6)}.png"
+                        f"centre/{pose_id.zfill(6)}.png"
 
         left_img = np.uint8(cv2.imread(img_file_left, 0))
         right_img = np.uint8(cv2.imread(img_file_right, 0))

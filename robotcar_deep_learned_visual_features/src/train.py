@@ -71,6 +71,7 @@ def execute_epoch(pipeline, net, data_loader, stats, epoch, mode, config, dof, o
             try:
                 # Compute the loss and the output pose.
                 losses, output_se3 = pipeline.forward(net, images, disparities, pose_se3, pose_log, epoch)
+                print("Ids for success: {}".format(ids))
 
                 if mode == 'training':
                     losses['total'].backward()
@@ -276,19 +277,19 @@ def main(config):
 
     # Training data generator (randomly sample a subset of the full dataset for each epoch).
     train_set = Dataset(**dataset_params)
-    train_sampler = RandomSampler(train_set, replacement=True, num_samples=1000)
+    train_sampler = RandomSampler(train_set, replacement=True, num_samples=500)
     train_set.load_mel_data(localization_data, 'training')
     train_loader = data.DataLoader(train_set, sampler=train_sampler, **dataloader_params)
 
     # Validation data generator (randomly sample a subset of the full dataset for each epoch).
     validation_set = Dataset(**dataset_params)
-    validation_sampler = RandomSampler(validation_set, replacement=True, num_samples=500)
+    validation_sampler = RandomSampler(validation_set, replacement=True, num_samples=200)
     validation_set.load_mel_data(localization_data, 'validation')
     validation_loader = data.DataLoader(validation_set, sampler=validation_sampler, **dataloader_params)
 
     # Set up device, using GPU 1
     device = torch.device('cuda:{}'.format(0) if torch.cuda.device_count() > 0 else 'cpu')
-    torch.cuda.set_device(1)
+    torch.cuda.set_device(0)
 
     # Set training pipeline
     training_pipeline = Pipeline(config)

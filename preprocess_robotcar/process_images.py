@@ -19,6 +19,7 @@ def reduce_resolution(image, full_image_path):
     resized_image.save(full_image_path)
 
 #Iterate through each image in the folder (both rtk and seasons), convert from Bayer to RGB OR reduce resolution, delete old image, and save new RGB image
+"""
 def process_in_bulk(root_dir, process):
     sub_folder = os.listdir(root_dir)
     for folder in sub_folder:
@@ -37,9 +38,26 @@ def process_in_bulk(root_dir, process):
                         convert_bayer_to_rgb(old_image, full_image_path)
                     if(process == "reduce_resolution"):
                         reduce_resolution(old_image,full_image_path)
+"""
+def process_in_bulk(root_dir,process):
+    runs = sorted(os.listdir(root_dir))
+    for run in runs:
+        print(run)
+        path_folder = sorted(os.listdir(os.path.join(root_dir,run,"images")))
+        for camera in path_folder:
+            full_path = os.path.join(root_dir,run,"images",camera)
+            images_list = sorted(os.listdir(full_path))
+            for image in images_list:
+                full_image_path = os.path.join(root_dir,run,"images",camera,image)
+                old_image = Image.open(full_image_path)
+                if(process == "bayer_to_rgb"):
+                    convert_bayer_to_rgb(old_image, full_image_path)
+                if(process == "reduce_resolution"):
+                    reduce_resolution(old_image,full_image_path)
 
 if __name__ == '__main__':
-    #process_in_bulk("/Volumes/scratchdata/lamlam/processed_data", "bayer_to_rgb")
     new_width = 512
     new_height = 384
-    process_in_bulk("/Volumes/scratchdata/lamlam/backup_coloured_full_resolution/processed_data","reduce_resolution")
+    process_in_bulk("/Volumes/scratchdata/lamlam/processed_data/robotcar_rtk", "bayer_to_rgb")
+    #process_in_bulk("/Volumes/scratchdata/lamlam/processed_data/robotcar_rtk_full", "reduce_resolution")
+    #process_in_bulk("/Volumes/scratchdata/lamlam/backup_coloured_full_resolution/processed_data","reduce_resolution")

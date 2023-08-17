@@ -1,9 +1,9 @@
 {
   "home_path": "/home/lamlam/data",
 
-  "experiment_name": "train_model_inthedark",
+  "experiment_name": "train_model_inthedark_new",
   "dataset_name": "inthedark",
-  "checkpoint_name": "network_inthedark",
+  "checkpoint_name": "utias_pre_trained_layer_16",
 
   "training": {
     "start_pose_estimation": 4,
@@ -33,8 +33,8 @@
   },
 
   "data_loader": {
-    "batch_size": 3,
-    "num_workers": 3,
+    "batch_size": 1,
+    "num_workers": 1,
     "shuffle": false
   },
 

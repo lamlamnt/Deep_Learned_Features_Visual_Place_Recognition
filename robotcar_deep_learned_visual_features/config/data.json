@@ -1,9 +1,9 @@
 {
   "home_path": "/home/lamlam/data/robotcar_seasons_v1",
 
-  "dataset_name": "robotcar_seasons_v5",
-  "num_train_samples": 2000,
-  "num_validation_samples": 1000,
+  "dataset_name": "robotcar_seasons_rtk_north",
+  "num_train_samples": 37000,
+  "num_validation_samples": 20000,
   "max_temporal_len": 3,
 
   "dataset":{
@@ -11,36 +11,41 @@
       "width": 512
   },
 
-  "train_paths": ["robotcar_seasons"],
-  "test_paths": ["robotcar_seasons"],
+  "train_paths": ["robotcar_rtk_full"],
+  "test_paths": ["robotcar_rtk_full"],
 
   "sampling_ratios_train": {
-    "robotcar_seasons": 1.0,
-    "robotcar_rtk": 0.0
+    "robotcar_seasons": 0.0,
+    "robotcar_rtk": 0.0,
+    "robotcar_rtk_full":1.0
   },
 
   "sampling_ratios_valid": {
-    "robotcar_seasons": 1.0,
-    "robotcar_rtk": 0.0
+    "robotcar_seasons": 0.0,
+    "robotcar_rtk": 0.0,
+    "robotcar_rtk_full":1.0
   },
 
   "train_runs": {
     "robotcar_seasons":[1,2,3,6,8],
-    "robotcar_rtk": []
+    "robotcar_rtk": [],
+    "robotcar_rtk_full":[9,11,14]
   },
 
   "validation_runs": {
     "robotcar_seasons": [4,5,7],
-    "robotcar_rtk": []
+    "robotcar_rtk": [],
+    "robotcar_rtk_full":[11,12,13]
   },
 
   "test_runs": {
-    "robotcar_seasons": [4,5,7],
-    "robotcar_rtk": []
+    "robotcar_seasons": [],
+    "robotcar_rtk": [],
+    "robotcar_rtk_full":[12,13]
   },
 
   "temporal_len": {
     "robotcar_seasons": {"4":1,"5":1,"7":1},
-    "robotcar_rtk": {}
+    "robotcar_rtk_full": {"12":1,"13":1}
   }
 }

@@ -25,3 +25,4 @@ def find_closest_se3_index(se3_query,list_ref):
     return min_index
 
 
+

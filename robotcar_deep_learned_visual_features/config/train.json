@@ -1,9 +1,9 @@
 {
   "home_path": "/home/lamlam/data/robotcar_seasons_v1",
 
-  "experiment_name": "train_model_robotcar_seasons_11",
-  "dataset_name": "robotcar_seasons_v5",
-  "checkpoint_name": "increase_num_samples",
+  "experiment_name": "train_model_robotcar_rtk_3",
+  "dataset_name": "robotcar_seasons_rtk_north",
+  "checkpoint_name": "rtk_training.pth_5",
 
   "training": {
     "start_pose_estimation": 4,
@@ -28,7 +28,7 @@
     "type": "ground_truth",
     "dim": ["plane"],
     "inlier_threshold": 0.6,
-    "error_tolerance":  {"3D": 4.0, "2D": 50.0, "plane": 3.0},
+    "error_tolerance":  {"3D": 4.0, "2D": 50.0, "plane": 20.0},
     "num_iterations": 15
   },
 
@@ -39,10 +39,10 @@
   },
 
   "stereo": {
-    "cu": 643.646973,
-    "cv": 493.378998,
-    "f": 983.044006,
-    "b": 0.24
+    "cu": 643.788025,
+    "cv": 484.407990,
+    "f": 964.828979,
+    "b": 0.12
   },
 
   "dataset": {
@@ -59,8 +59,8 @@
 
   "scheduler": {
     "type": "StepLR",
-    "step_size": 50,
-    "gamma": 1.0
+    "step_size": 10,
+    "gamma": 0.7
   },
 
   "loss": {

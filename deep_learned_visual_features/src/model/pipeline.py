@@ -236,12 +236,20 @@ class Pipeline(nn.Module):
             #  Check that we have enough inliers for all example sin the bach to compute pose.
             valid = kpt_valid_src & kpt_valid_pseudo & valid_inliers
 
+            print(torch.sum(kpt_valid_src).item())
+            print(torch.sum(kpt_valid_pseudo).item())
+            print(torch.sum(valid_inliers).item())
+
             num_inliers = torch.sum(valid.squeeze(1), dim=1)[0]
             if torch.any(num_inliers < 6):
                 raise RuntimeError('Too few inliers to compute pose: {}'.format(num_inliers))
 
             weights[valid == 0] = 0.0
             T_trg_src = self.svd_block(kpt_3D_src, kpt_3D_pseudo, weights)
+
+            print(T_trg_src)
+            print("Ground truth pose:")
+            print(T_trg_src_gt_inl)
 
         # If we are testing, return the pose.
         if test:

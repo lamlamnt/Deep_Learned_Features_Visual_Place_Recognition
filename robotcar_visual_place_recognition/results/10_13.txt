@@ -1,0 +1,14 @@
+reference_run: 10
+query_run: 13
+network_path: /home/lamlam/data/robotcar_seasons_v1/networks/3_change_weighting_70.pth
+image_folder_path: /Volumes/scratchdata/lamlam/processed_data/robotcar_rtk/run_0000
+layer_size: 16
+descriptor_difference_method: cosine
+path_length: 260
+number_meter_per_frame: 0.5
+success_threshold_in_m: [5, 10, 25]
+downsampled: no
+Success rate at threshold 5m is 0.01670297748729121
+Success rate at threshold 10m is 0.020334059549745823
+Success rate at threshold 25m is 0.03994190268700073
+Average error in meters: 531.4443797358102

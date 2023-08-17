@@ -39,10 +39,22 @@ class Pipeline(nn.Module):
         self.width = config['dataset']['width']
 
         # Transform from sensor to vehicle.
-        T_s_v = torch.tensor([[1.0, 0.0, 0.0, 0.0],
-                              [0.0, 1.0, 0.0, 0.0],
-                              [0.0, 0.0, 1.0, 1.52],
+        """
+        T_s_v = torch.tensor([[0.0, -1, 0.0, 0.0],
+                              [0.0, 0.0, -1, 1.52],
+                              [1, 0.0, 0, 0],
                               [0.0, 0.0, 0.0, 1.0]])
+        """
+        T_s_v = torch.tensor([[0.00499598,-0.99990688,-0.01269945,0.1181],
+                            [-0.03998933,0.01248968,-0.99912205,1.1948],
+                            [0.99918762,0.00549944,-0.03992321,-1.7132],
+                            [0,0,0,1]])
+        """
+        T_s_v = torch.tensor([[-0.00549944,-0.99990688,0.01248968,-0.11258797],
+                                [0.03992321,-0.01269945,-0.99912205,-1.12685438],
+                                [0.99918762,-0.00499598,0.03998933,1.75899746],
+                                [0,0,0,1]])
+        """
         self.register_buffer('T_s_v', T_s_v)
 
         # Set up the different blocks needed in the pipeline
@@ -210,6 +222,9 @@ class Pipeline(nn.Module):
                 err = torch.norm(kpt_3D_pseudo_vehicle[:, 0:2, :] - kpt_3D_pseudo_gt_vehicle[:, 0:2, :], dim=1)  # BxN
                 inliers_plane = err < self.config['outlier_rejection']['error_tolerance']['plane']
                 valid_inliers = valid_inliers & (inliers_plane.unsqueeze(1))
+                #print(kpt_3D_pseudo_vehicle[:, 0:2, :]) 
+                #print(kpt_3D_pseudo_gt_vehicle[:, 0:2, :]) 
+                #print(torch.sum(valid_inliers).item())
 
         if self.config['outlier_rejection']['on'] and (self.config['outlier_rejection']['type'] == 'ransac'):
             # Find outlier based on RANSAC.
@@ -232,7 +247,7 @@ class Pipeline(nn.Module):
 
             #  Check that we have enough inliers for all example sin the bach to compute pose.
             valid = kpt_valid_src & kpt_valid_pseudo & valid_inliers
-
+                        
             num_inliers = torch.sum(valid.squeeze(1), dim=1)[0]
             if torch.any(num_inliers < 6):
                 raise RuntimeError('Too few inliers to compute pose: {}'.format(num_inliers))

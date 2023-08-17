@@ -1,0 +1,27 @@
+network_path: /home/lamlam/data/robotcar_seasons_v1/networks/3_change_weighting_70.pth
+image_folder_path: /Volumes/scratchdata/lamlam/processed_data/robotcar_rtk_full/run_0000
+validation_run: 13
+validation_run_dark: 9
+sample_rate_num_frames: 30
+layer_size: 16
+clustering_method: kmeans
+score_threshold_to_be_chosen: 0.4
+dbscan_eps: 0.5
+dbscan_min_samples: 10
+threshold_to_eliminate_clusters: 3000
+kmeans_num_clusters: 150
+histogram_comparison_method: cross_entropy
+number_eigenvalues_removed: 23
+reference_run: 10
+query_run: 11
+path_length: 260
+downsampled: no
+number_meter_per_frame: 0.5
+success_threshold_in_m: [5, 10, 25]
+compressed_options: ['no', 'svd', 'spectral_decomposition']
+compressed: no
+num_singular_values_removed: 450
+Success rate at threshold 5m is 0.28395614231371674
+Success rate at threshold 10m is 0.3289326471246364
+Success rate at threshold 25m is 0.3631684940702618
+Average error in meters: 337.3177498755231

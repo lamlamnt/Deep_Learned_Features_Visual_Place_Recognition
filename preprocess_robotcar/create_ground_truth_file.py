@@ -22,6 +22,7 @@ def convert_gh_to_stereo(runs):
                                 se3_gh_np = np.reshape(se3_gh,(4,4))
                                 #Do the transformation here!!!!
                                 se3_stereo = se3_gh_np@rear_extrinsic_seasons
+                                #se3_stereo = se3_gh_np@T_C_G@rear_extrinsic_seasons
                                 str_list = [str(element) for element in se3_stereo.flatten().tolist()]
                                 content = " ".join(str_list)
                                 output_file.write(se3_full[0] + " " + content + "\n")
@@ -57,8 +58,11 @@ def create_relative_file(reference_run, query_runs):
                                 #Iterate through all frames in reference run to find the closest frame in reference run 
                                 #to the current frame in query run (many different methods to do this)
                                 index_of_closest = transform_tools.find_closest_se3_index(se3_query_matrix,list_se3_ref)
+
                                 #Calculate the relative se3 transformation. Np array
                                 relative_se3 = np.linalg.inv(list_se3_ref[index_of_closest])@se3_query_matrix
+                                relative_se3 = np.linalg.inv(T_C_G)@(relative_se3@T_C_G)
+                                
                                 #Convert from bumblee frame to vehicle frame - due to no rotation part - this commented out line doesn't do anything
                                 #relative_se3 = np.linalg.inv(T_s_v)@(relative_se3@T_s_v)
                                 #Write relative se3 to file and format properly for training
@@ -87,6 +91,7 @@ def create_transform_temporal(reference_run):
                 for i in range(len(list_se3_ref)-1):
                         #i is the previous index
                         relative_se3 = np.linalg.inv(list_se3_ref[i+1])@list_se3_ref[i]
+                        relative_se3 = np.linalg.inv(T_C_G)@(relative_se3@T_C_G)
                         #Convert from bumblee frame to vehicle frame - due to no rotation part - this commented out line doesn't do anything
                         #relative_se3 = np.linalg.inv(T_s_v)@(relative_se3@T_s_v)
                         str_list = [str(element) for element in relative_se3.flatten().tolist()]
@@ -100,26 +105,38 @@ if __name__ == '__main__':
         root_dir = "/Volumes/scratchdata/lamlam/processed_data/robotcar_seasons"
         runs = [0,1,2,3,4,5,6,7,8]
         gh_file_name = "se3_grasshopper_2.txt"
-        stereo_file_name = "se3_stereo.txt"
+        #stereo_file_name = "se3_stereo.txt"
+        stereo_file_name = "se3_grasshopper_2.txt"
         threshold_translate = 2.0
         threshold_rotate = -0.8
 
+        #Converts vehicle to camera 
+        T_C_G = np.array([[0.0, -1, 0.0, 0.0],
+                              [0.0, 0.0, -1, 1.52],
+                              [1, 0.0, 0, 0],
+                              [0.0, 0.0, 0.0, 1.0]])
+
         #Using the data from sdk instead of from seasons
         xyzrpy = np.array([-2.0582, 0.0894, 0.3675, -0.0119, -0.2498, 3.1283])
-        rear_extrinsic_seasons = np.asarray(transform.build_se3_transform(xyzrpy))
-        """
+        #rear_extrinsic_seasons = np.asarray(transform.build_se3_transform(xyzrpy))
+        
         rear_extrinsic_seasons = np.array([[-0.999802, -0.011530, -0.016233, 0.060209],
                                    [-0.015184, 0.968893, 0.247013, 0.153691],
                                     [0.012880, 0.247210, -0.968876, -2.086142],
                                     [0.000000, 0.000000, 0.000000, 1.000000]])
         """
-        #Transformation matrix that transforms a point from vehicle frame to sensor frame
-        T_s_v = np.array([[1,0,0,0],
-                          [0,1,0,0],
-                          [0,0,1,1.52],
-                          [0,0,0,1]])
-
-        convert_gh_to_stereo(runs)
+        actual_rear_extrinsic_seasons = np.array([[-0.96887628, -0.01623279, 0.24701266, -2.0582],
+                                                [0.0128797, -0.99980175, -0.01518442, 0.0894],
+                                                [0.24721017, -0.01153037, 0.96889328, 0.3675],
+                                                [0.0,0.0,0.0,1.0]])
+        
+        rear_extrinsic_seasons = np.array([[-1,0,0,-2],
+                                           [0,-1,0,0],
+                                           [0,0,1,0],
+                                           [0,0,0,1]])
+        """                           
+        if stereo_file_name == "se3_stereo.txt":
+                convert_gh_to_stereo(runs)
 
         reference_run = 0
         

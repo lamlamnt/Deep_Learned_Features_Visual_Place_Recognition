@@ -1,0 +1,12 @@
+{
+    "reference_run":10,
+    "query_run":11,
+    "network_path": "/home/lamlam/data/robotcar_seasons_v1/networks/3_change_weighting_70.pth",
+    "image_folder_path":"/Volumes/scratchdata/lamlam/processed_data/robotcar_rtk/run_0000",
+    "layer_size":16,
+    "descriptor_difference_method": "cosine",
+    "path_length":260,
+    "number_meter_per_frame":0.5,
+    "success_threshold_in_m": [5,10,25],
+    "downsampled": "no"
+}

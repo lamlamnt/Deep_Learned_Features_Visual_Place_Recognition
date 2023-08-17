@@ -1,0 +1,15 @@
+reference_run: 10
+query_run: 9
+network_path: /home/lamlam/data/networks/network_multiseason_inthedark_layer16.pth
+image_folder_path: /Volumes/scratchdata/lamlam/processed_data/robotcar_rtk/run_0000
+layer_size: 16
+descriptor_difference_method: cosine
+sampling_method: downsampled
+first_num_frames: 500
+path_length: 260
+number_meter_per_frame: 0.5
+success_threshold_in_m: [5, 10]
+downsampled: no
+Success rate at threshold 5m is 0.0025031289111389237
+Success rate at threshold 10m is 0.0031289111389236545
+Average error in meters: 604.9729622701456

@@ -71,8 +71,8 @@ def create_relative_file(reference_run, query_runs):
                                 str_list = ["{:.6f}".format(element) for element in relative_se3.flatten().tolist()]
                                 content = ",".join(str_list)
                                 #Want time stamp of reference frame, and not just index
-                                #if(abs(float(str_list[3])) < threshold_translate and float(str_list[0]) > threshold_rotate): 
-                                relative_file.write(str(value) + "," + se3_query_timestamp + "," + str(reference_run) + "," + list_timestamps_ref[index_of_closest] + "," + content + "\n")
+                                if(abs(float(str_list[3])) < threshold_translate and float(str_list[0]) > threshold_rotate): 
+                                        relative_file.write(str(value) + "," + se3_query_timestamp + "," + str(reference_run) + "," + list_timestamps_ref[index_of_closest] + "," + content + "\n")
 
 def create_transform_temporal(reference_run):
         reference_file_path = os.path.join(root_dir,"run_" + str(reference_run).zfill(6), rtk_file_name)
@@ -98,15 +98,14 @@ def create_transform_temporal(reference_run):
                         str_list = ["{:.6f}".format(element) for element in relative_se3.flatten().tolist()]
                         content = ",".join(str_list)
                         #Want time stamp of reference frame, and not just index 
-                        #if(abs(float(str_list[3])) < threshold_translate and float(str_list[0]) > threshold_rotate): 
-                        output_file.write(str(reference_run) + "," + list_timestamps_ref[i] + "," + str(reference_run) + "," + list_timestamps_ref[i+1] + "," + content + "\n")
+                        if(abs(float(str_list[3])) < threshold_translate and float(str_list[0]) > threshold_rotate): 
+                                output_file.write(str(reference_run) + "," + list_timestamps_ref[i] + "," + str(reference_run) + "," + list_timestamps_ref[i+1] + "," + content + "\n")
 
 if __name__ == '__main__':
     root_dir = "/Volumes/scratchdata/lamlam/processed_data/robotcar_rtk_full"
     #rtk_file_name = "se3_rtk.txt"
     rtk_file_name = "se3_rtk_interpolated.txt"
     runs = [9,0,11,12,13,14]
-    #runs = [9,0]
     threshold_translate = 5.0
     threshold_rotate = -0.5
 
@@ -116,7 +115,7 @@ if __name__ == '__main__':
                 [0,0,-1,0],
                 [0,0,0,1]])
 
-    #create_se3_rtk_file()
+    create_se3_rtk_file()
     
     reference_run = 0
     del runs[1]

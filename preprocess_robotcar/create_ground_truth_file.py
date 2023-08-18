@@ -105,8 +105,7 @@ if __name__ == '__main__':
         root_dir = "/Volumes/scratchdata/lamlam/processed_data/robotcar_seasons"
         runs = [0,1,2,3,4,5,6,7,8]
         gh_file_name = "se3_grasshopper_2.txt"
-        #stereo_file_name = "se3_stereo.txt"
-        stereo_file_name = "se3_grasshopper_2.txt"
+        stereo_file_name = "se3_stereo.txt"
         threshold_translate = 2.0
         threshold_rotate = -0.8
 
@@ -117,24 +116,14 @@ if __name__ == '__main__':
                               [0.0, 0.0, 0.0, 1.0]])
 
         #Using the data from sdk instead of from seasons
-        xyzrpy = np.array([-2.0582, 0.0894, 0.3675, -0.0119, -0.2498, 3.1283])
+        #xyzrpy = np.array([-2.0582, 0.0894, 0.3675, -0.0119, -0.2498, 3.1283])
         #rear_extrinsic_seasons = np.asarray(transform.build_se3_transform(xyzrpy))
         
         rear_extrinsic_seasons = np.array([[-0.999802, -0.011530, -0.016233, 0.060209],
                                    [-0.015184, 0.968893, 0.247013, 0.153691],
                                     [0.012880, 0.247210, -0.968876, -2.086142],
-                                    [0.000000, 0.000000, 0.000000, 1.000000]])
-        """
-        actual_rear_extrinsic_seasons = np.array([[-0.96887628, -0.01623279, 0.24701266, -2.0582],
-                                                [0.0128797, -0.99980175, -0.01518442, 0.0894],
-                                                [0.24721017, -0.01153037, 0.96889328, 0.3675],
-                                                [0.0,0.0,0.0,1.0]])
-        
-        rear_extrinsic_seasons = np.array([[-1,0,0,-2],
-                                           [0,-1,0,0],
-                                           [0,0,1,0],
-                                           [0,0,0,1]])
-        """                           
+                                    [0.000000, 0.000000, 0.000000, 1.000000]])       
+                    
         if stereo_file_name == "se3_stereo.txt":
                 convert_gh_to_stereo(runs)
 

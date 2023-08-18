@@ -124,12 +124,6 @@ def find_closest_number(sorted_numbers, target):
             right = mid - 1
     return closest_number
 
-def parse_gps():
-#If rtk exists, use rtk. Otherwise, use gps/ins
-    pass
-
-
-if __name__ == '__main__':
 
 
 

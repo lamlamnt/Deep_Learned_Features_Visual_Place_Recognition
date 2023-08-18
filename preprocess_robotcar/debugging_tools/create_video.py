@@ -25,7 +25,3 @@ def create_video(run_number):
 
     # Release the VideoWriter and close the video file
     video.release()
-
-#Trace out the gps path
-def trace_gps():
-    pass

@@ -52,10 +52,15 @@ python3 -m src.train --config config/train.json
 <br> cpp_binding/exportnetwork_to_pt.py exports .pth to .pt file and cpp_binding/test.cpp uses Torch Jit to load the .pt file and performs inference
 <br>
 <br> __4. Visual place recognition on UTIAS inthedark data__: see folder robotcar_visual_place_recognition 
-<br> To run: main.py --config config_cluster.json
-<br> Pipeline: 
-<br> Insert recall graph image here
-<br> Issues with GPS data for dark runs: 
+<br> Each frame is inferenced through a UNET, and normalized descriptors are extracted. 
+<br> Using max-pooling: Maxpool the normalized descriptors and then use cosine similarity to measure the similarity between frames
+<br> To run: main.py --config config.json
+<br> Using BoW/clustering approach: Validation run (downsampled)'s descriptors are used to create clusters (options:dbscan or kmeans, not much of a difference in terms of results but kmeans is much faster) ->  Reference run's and query run's descriptors are put into the created clusters. The histogram of each of the query run's frame is compared to each of the reference run's frame using cross entropy or EMD (wasserstein distance) (cross entropy seems to do better).
+<br> 
+<br> To run: cd clustering and then main.py --config config_cluster.json
+<br> ![Recall@1 Graph for inthedark dataset](/images/recall_plot_inthedark.png)
+<br>
+<br> Issues with GPS data for dark runs: All of the dark runs's gps is not accurate. See /table/inthedark_results.xlsx. One way to still use these runs (for example because we want to see how well a dark query run does with a bright reference run) is to use the transform_spatial.txt files, which localize each frame in all the other runs to a frame in run_000000. We can replace the gps data for the dark runs' frames with the gps data of the frames in run_000000 that they were localized to.
 <br>
 <br> __5. Pre-process Robotcar and Robotcar Seasons data for training__: see folder preprocess_robotcar
 <br> - Robotcar Seasons data is a subset of the original Robotcar.
@@ -65,7 +70,7 @@ python3 -m src.train --config config/train.json
 <br> 
 <br> - Using Robotcar Seasons robotcar_v2_train.txt: Only poses for frames from the 9 query runs are given in robotcar_v2_train.txt. The reference frame's poses are given in a different format (in COLMAP/NVM models). So, I only used the 9 runs in robotcar_v2_train.txt, chose one of them (specifically 2015-03-10-14-18-10, which has the tag "sun") as the reference run, and used the other 8 as query runs. Each of the run only has about 200 frames each, which are divided up into different areas. So, for example, the first 15 (or whatever number) frames will be close to each other, and the next 15 frames will be close to each other but far from the first 15 frames. For training using this pose estimation model, it's not great to use frames from different runs that are metrically far from each other because they will most likely be rejected as outliers anyways. 
 <br> - Transformation: The se3 transformation matrices given in robotcar_v2_train.txt transform points from the Grasshopper coordinate system where the z-axis is forward, x-axis points to the right, and y-axis points downwards to the world coordinate system, where x points forward. The poses are all relative to a same stationary global origin. The UTIAS model requires the ground truth poses to be in the vehicle frame with x pointing forward, z upwards, and y to the left. The UTIAS model uses images taken using the Bumblee stereo images while Robotcar Seasons uses images taken using the Grasshopper camera. 
-<br> Insert transformation formula and extrinsic here
+<br> ![Transformation formula](/images/Transformation.jpg)
 <br> However, none of the many transformations I tried results in reasonable-looking z-direction translation elements (the z-direction translation elements in the relative poses between one frame in the reference run and one frame in query run should not exceed 5 meters for Oxford). 
 <br>
 <br> file_rearrange.py: contains functions for preparing Robotcar Seasons data for training (like copying the images with the closest timestamps to the right folder)
@@ -74,14 +79,16 @@ python3 -m src.train --config config/train.json
 <br> Using Robotcar RTK: The main advantage of using RTK data is that there are lot more frames per run and many more runs can be used for training compared to using Robotcar Seasons data, but Robotcar Seasons might contain more accurate poses (if we can get the transformations correct that is).
 <br>
 <br> rtk_to_poses.py: converts rtk northing,east,down and rpy data to relative poses for training
-<br> process_images.py: performs demosaicing and reduces resolution of images 
+<br> process_images.py: performs demosaicing and reduces resolution of images. The resolution of 
 <br> transform_tools.py: helper functions 
 <br>
 <br> __6. Training Robotcar dataset__: see robotcar_deep_learned_visual_features folder
-<br> Tuning hyperparameters: Besides changing the camera parameters to work with the camera used for Oxford Robotcar, I also changed the gamma rate and step size to make it converge a bit better for Robotcar and changed parameters to make outlier rejection less strict (increased plane error tolerance in config file and accepted depth range in check_valid_disparity in stereo_camera_model.py)
+<br> Tuning hyperparameters: Besides changing the camera parameters to work with the camera used for Oxford Robotcar, I also changed the gamma rate and step size to make it converge a bit better for Robotcar and changed parameters to make outlier rejection less strict (increased plane error tolerance in config file and accepted depth range in check_valid_disparity in stereo_camera_model.py).
 <br>
-<br> Future potential things to change/test for training Robotcar:
-<br> - 
+<br> __Future potential things to change/test for training Robotcar__:
+<br> - Do not sample. Use 
+<br> - For debugging/comparing poses and transformations, 
+<br> - Interpolate poses
 <br>
 <br> __7. Visual place recognition on Robotcar Seasons data__:  
 <br> Using the checkpoint provided by UTIAS (trained on inthedark dataset) to do visual place recognition (using BoW) on Robotcar dataset for reference run 2014-11-18-13-20-12 (run_000000) and query run 2014-12-02-15-30-08 (run_000011), the average error is 329m and recall@1 rate is 29.5%, 36%, and 41.3% at 5m, 10m, and 25m respectively.

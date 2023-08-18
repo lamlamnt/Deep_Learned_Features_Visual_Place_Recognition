@@ -88,7 +88,7 @@ python3 -m src.train --config config/train.json
 <br> __Future potential things to change/test for training Robotcar__:
 <br> - Do not sample. Use 
 <br> - For debugging/comparing poses and transformations, 
-<br> - Interpolate poses
+<br> - Since it seems the model is very sensitive to small changes in poses, interpolate poses (using robotcar-sdk) to 
 <br>
 <br> __7. Visual place recognition on Robotcar Seasons data__:  
 <br> Using the checkpoint provided by UTIAS (trained on inthedark dataset) to do visual place recognition (using BoW) on Robotcar dataset for reference run 2014-11-18-13-20-12 (run_000000) and query run 2014-12-02-15-30-08 (run_000011), the average error is 329m and recall@1 rate is 29.5%, 36%, and 41.3% at 5m, 10m, and 25m respectively.

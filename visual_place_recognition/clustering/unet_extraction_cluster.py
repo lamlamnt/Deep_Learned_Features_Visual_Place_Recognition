@@ -7,7 +7,6 @@ import torch.nn.functional as F
 from torchvision import transforms
 import cv2
 import matplotlib.pyplot as plt
-
 sys.path.append("/home/lamlam/code/deep_learned_visual_features")
 from src.model.unet import UNet
 from src.model.keypoint_block import KeypointBlock
@@ -98,7 +97,7 @@ class LearnedFeatureDetector(nn.Module):
         normalized_descriptor = F.normalize(chosen_descriptors, p=1, dim=1)
         return normalized_descriptor.tolist()
     
-    def run_window_normalize(self,image_tensor,score_threshold):
+    def run_window_normalize(self,image_tensor):
         if self.cuda:
             image_tensor = image_tensor.cuda()
         detector_scores, scores, descriptors = self.net(image_tensor)

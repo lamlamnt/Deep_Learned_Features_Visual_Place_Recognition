@@ -52,7 +52,7 @@ python3 -m src.train --config config/train.json
 <br> cpp_binding/exportnetwork_to_pt.py exports .pth to .pt file and cpp_binding/test.cpp uses Torch Jit to load the .pt file and performs inference
 <br>
 <br> __4. Visual place recognition on UTIAS inthedark data: see folder visual_place_recognition__
-<br> Each frame is inferenced through a UNET, and normalized descriptors are extracted. 
+<br> Each frame is inferenced through a UNET (first layer size: 16 or 32, depending on which checkpoint is used), and normalized descriptors are extracted. 
 <br> Using max-pooling: Maxpool the normalized descriptors and then use cosine similarity to measure the similarity between frames
 <br> __To run: main.py --config config.json__
 <br> Using BoW/clustering approach: Validation run (downsampled)'s descriptors are used to create clusters (options:dbscan or kmeans, not much of a difference in terms of results but kmeans is much faster) ->  Reference run's and query run's descriptors are put into the created clusters. The histogram of each of the query run's frame is compared to each of the reference run's frame using cross entropy or EMD (wasserstein distance) (cross entropy seems to do better).
@@ -60,7 +60,9 @@ python3 -m src.train --config config/train.json
 <br> __To run: cd clustering and then main.py --config config_cluster.json__
 <br> ![Recall@1 Graph for inthedark dataset](/images/recall_plot_inthedark.png)
 <br>
-<br> Issues with GPS data for dark runs: All of the dark runs's gps is not accurate. See /table/inthedark_results.xlsx. One way to still use these runs (for example because we want to see how well a dark query run does with a bright reference run) is to use the transform_spatial.txt files, which localize each frame in all the other runs to a frame in run_000000. We can replace the gps data for the dark runs' frames with the gps data of the frames in run_000000 that they were localized to.
+<br> Issues with GPS data for dark runs: All of the dark runs's gps data is not accurate. See /table/inthedark_results.xlsx to see which runs have accurate gps. One way to still use these runs (for example because we want to see how well a dark query run does with a bright reference run) is to use the transform_spatial.txt files, which localize each frame in all the other runs to a frame in run_000000. We can replace the gps data for the dark runs' frames with the gps data of the frames in run_000000 that they were localized to.
+<br>
+<br> I tried using matrix deflation (svd decomposition and then remove eigenvalues with small magnitude) on the similarity matrix to improve recall@1 rate, but it doesn't improve recall@1rate probably because this method is to prevent visual ambiguity and not for illumination invariance. 
 <br>
 <br> __5. Pre-process Robotcar and Robotcar Seasons data for training: see folder preprocess_robotcar__
 <br> - Robotcar Seasons data is a subset of the original Robotcar.
@@ -81,6 +83,7 @@ python3 -m src.train --config config/train.json
 <br> rtk_to_poses.py: converts rtk northing,east,down and rpy data to relative poses for training
 <br> process_images.py: performs demosaicing and reduces resolution of images. The resolution of 
 <br> transform_tools.py: helper functions 
+<br> Should use Robotcar RTK runs for testing visual place recognition (use GPS latitude and longitude)
 <br>
 <br> __6. Training Robotcar dataset: see robotcar_deep_learned_visual_features folder__
 <br> Tuning hyperparameters: Besides changing the camera parameters to work with the camera used for Oxford Robotcar, I also changed the gamma rate and step size to make it converge a bit better for Robotcar and changed parameters to make outlier rejection less strict (increased plane error tolerance in config file and accepted depth range in check_valid_disparity in stereo_camera_model.py).

@@ -1,9 +1,11 @@
 <br> __1. Deep Learned Features: see folder deep_learned_visual_features__
 <br> Code: https://github.com/utiasASRL/deep_learned_visual_features <span>
 <br> Dataset (multiseason and inthedark): http://asrl.utias.utoronto.ca/datasets/2020-vtr-dataset/
+<br> Paper: https://arxiv.org/abs/2109.04041
 <br> On the Fargons, these 2 datasets are currently in /Volumes/oridatastore09/ThirdPartyData/utias. Multiseason runs do not have GPS data, and only some inthedark runs have GPS data.
 <br> Information about training: 
 <br> - One batch of multiseason and inthedark uses 6.6 GB and 6.2 GB respectively of GPU memory usage for training. A checkpoint (.pth file) is stored every time validation loss decreases, and early-stopping counter is incremented for every consecutive increase in validation loss. Using the 24GB RAM GPU, we can do up to batch size = 3. 
+<br>
 <br> __Step 1: Build dataset__ -> 
 '''
 python3 -m data.build_train_test_dataset_loc --config config/data.json
@@ -65,6 +67,9 @@ python3 -m src.train --config config/train.json
 <br> I tried using matrix deflation (svd decomposition and then remove eigenvalues with small magnitude) on the similarity matrix to improve recall@1 rate, but it doesn't improve recall@1rate probably because this method is to prevent visual ambiguity and not for illumination invariance. 
 <br>
 <br> __5. Pre-process Robotcar and Robotcar Seasons data for training: see folder preprocess_robotcar__
+<br> Link to Robotcar SDK: https://github.com/ori-mrg/robotcar-dataset-sdk
+<br> Link to Robotcar Dataset documentation: https://robotcar-dataset.robots.ox.ac.uk/documentation/
+<br> Link to Robotcar Seasons: https://data.ciirc.cvut.cz/public/projects/2020VisualLocalization/RobotCar-Seasons/
 <br> - Robotcar Seasons data is a subset of the original Robotcar.
 <br> - /Volumes/scratchdata/lamlam contains the full folder for stereo_left and stereo_right images as well as vo and gps data in the folders with their dates and times (ex. 2014-11-14-16-34-33) for all 10 Robotcar Seasons runs and 6 Robotcar runs with RTK data (also includes stereo_centre images for these). Of the 10 Robotcar Seasons runs, there's one reference run and 9 query runs. 
 <br> - /Volumes/scratchdata/lamlam/processed_data/robotcar_seasons contains Robotcar Seasons data that has been processed for training. <br> - /Volumes/scratchdata/lamlam/processed_data/robotcar_rtk contains 6 Robotcar runs with RTK data (not the same runs as Robotcar Seasons) and is heavily downsampled (around 1300 frames/run) 
